@@ -48,17 +48,3 @@ cd ..
 terraform init -backend-config="bucket=$TF_VAR_backend_bucket" -backend-config="credentials=$TF_VAR_credentials"
 terraform apply -var="namespace=button" -var="application=cas" -auto-approve
 ```
-
-## Tests
-
-- There are two types of tests in this repo.
-
-1. A set of tests with `@google-cloud/storage`, which is a Node.js idiomatic client for Cloud Storage.
-
-   - go to `node-example` directory.
-
-1. A set of tests with `Terratest`, which is a Go library that provides patterns and helper functions for testing infrastructure.
-
-   - go to `terratest` directory.
-
-- Make sure that you have followed the steps above to create all defined resources and key files in local `keys` directory.
