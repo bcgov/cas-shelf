@@ -4,7 +4,7 @@ variable "my_bucket_name" {}
 
 variable "other_bucket_name" {}
 
-variable "credentials_file_path" {}
+variable "credentials" {}
 
 locals {
   region = "northamerica-northeast1" # Montreal

@@ -11,5 +11,5 @@ provider "google" {
 resource "google_storage_bucket_object" "test_file" {
   name   = "test.txt"
   source = "test.txt"
-  bucket = var.bucket_name
+  bucket = "${local.bucket_prefix}-${var.bucket_name}"
 }

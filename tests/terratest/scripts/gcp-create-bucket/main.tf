@@ -8,14 +8,15 @@ provider "google" {
   region      = local.region
 }
 
-resource "random_string" "new_bucket_prefix" {
-  length = 12
-  special = false
-  upper = false
+resource "random_string" "bucket_prefix" {
+  length           = 12
+  special          = false
+  upper            = false
+  number           = false
   override_special = "/@£$"
 }
 
 resource "google_storage_bucket" "new_bucket" {
-  name     = "${random_string.new_bucket_prefix.result}-bucket-for-terratest"
+  name     = "${random_string.bucket_prefix.result}-bucket-for-terratest"
   location = local.region
 }

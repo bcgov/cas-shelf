@@ -5,10 +5,12 @@ const { Storage } = require('@google-cloud/storage');
 
 const statAsync = util.promisify(fs.stat);
 const readdirAsync = util.promisify(fs.readdir);
+const readfileAsync = util.promisify(fs.readFile);
 
 const projectId = process.env.TF_VAR_project_name;
 
 const KEY_DIRECTORY = '../keys';
+const BUCKET_PREFIX_FILE = '../test-bucket-prefix';
 
 module.exports = async ({ logSuccess = false, logError = false } = {}) => {
   const stat = await statAsync(KEY_DIRECTORY);
@@ -19,8 +21,11 @@ module.exports = async ({ logSuccess = false, logError = false } = {}) => {
   const keyPath1 = keyPaths[0];
   const keyPath2 = keyPaths[1];
 
-  const myBucketName = path.basename(keyPath1, '.json');
-  const otherBucketName = path.basename(keyPath2, '.json');
+  const prefix = await readfileAsync(BUCKET_PREFIX_FILE, 'utf8');
+  const getBucketName = keypath => `${prefix}-${path.basename(keypath, '.json')}`;
+
+  const myBucketName = getBucketName(keyPath1);
+  const otherBucketName = getBucketName(keyPath2);
 
   // Creates a client from a Google service account key.
   const storage = new Storage({ keyFilename: keyPath1, projectId });
