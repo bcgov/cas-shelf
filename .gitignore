@@ -6,5 +6,6 @@ credentials.json
 keys
 node_modules
 downloaded.txt
-terratest/test/src
-terratest/test/pkg
+tests/test-bucket-prefix
+tests/terratest/test/src
+tests/terratest/test/pkg

@@ -21,7 +21,6 @@ variable "kubernetes_token" {
 }
 
 variable "slug" {
-  type        = list(string)
   description = "The slug for the OCP cluster"
 }
 
