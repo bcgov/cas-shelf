@@ -1,0 +1,11 @@
+.terraform
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfvars
+credentials.json
+keys
+node_modules
+downloaded.txt
+tests/test-bucket-prefix
+tests/terratest/test/src
+tests/terratest/test/pkg
