@@ -19,7 +19,7 @@ if [ "$WORKSPACE_ID" != null ]; then
   exit 0
 fi
 
-echo "{\"data\":{\"attributes\":{\"name\":\"$WORKSPACE_NAME\"},\"type\":\"workspaces\"}}" >./create_workspace.json
+echo "{\"data\":{\"attributes\":{\"name\":\"$WORKSPACE_NAME\",\"auto-apply\":true},\"type\":\"workspaces\"}}" >./create_workspace.json
 
 WORKSPACE_ID=($(curl \
   --header "Authorization: Bearer $TFC_TOKEN" \
