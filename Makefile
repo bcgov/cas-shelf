@@ -24,4 +24,4 @@ add-env:
 
 .PHONY: run
 run:
-	./tfe-scripts/tf-run.sh $(workspace_id)
+	./tfe-scripts/tf-run.sh $(org) $(workspace)
