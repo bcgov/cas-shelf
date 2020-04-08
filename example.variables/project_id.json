@@ -1,0 +1,13 @@
+{
+  "data": {
+    "type": "vars",
+    "attributes": {
+      "key": "project_id",
+      "value": "project_id",
+      "description": "the project id of Google Cloud Platform",
+      "category": "terraform",
+      "hcl": false,
+      "sensitive": false
+    }
+  }
+}

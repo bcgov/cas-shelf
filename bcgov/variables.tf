@@ -8,7 +8,7 @@ variable "credentials" {
   description = "The service account private key of the GCP project as json string"
 }
 
-variable "project_name" {
+variable "project_id" {
   description = "The ID of the GCP project"
 }
 
@@ -24,7 +24,7 @@ variable "slug" {
   description = "The slug for the OCP cluster"
 }
 
-variable "application" {
+variable "apps" {
   type        = list(string)
   description = "The list of application names of the OCP project"
 }

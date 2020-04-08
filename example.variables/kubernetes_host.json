@@ -1,0 +1,13 @@
+{
+  "data": {
+    "type": "vars",
+    "attributes": {
+      "key": "kubernetes_host",
+      "value": "kubernetes_host",
+      "description": "the hostname of Openshift cluster",
+      "category": "terraform",
+      "hcl": false,
+      "sensitive": false
+    }
+  }
+}

@@ -8,14 +8,14 @@ provider "kubernetes" {
 # Configure GCP infrastructure to setup the credentials, default project and location (zone and/or region) for your resources
 provider "google" {
   credentials = var.credentials
-  project     = var.project_name
+  project     = var.project_id
   region      = local.region
 }
 
 # Create GCS buckets
 resource "google_storage_bucket" "gc_bucket" {
-  count    = length(var.application) * length(var.envs)
-  name     = "${var.slug}-${element(var.envs, count.index % length(var.envs))}-${element(var.application, floor(count.index / length(var.envs)))}"
+  count    = length(var.apps) * length(var.envs)
+  name     = "${var.slug}-${element(var.envs, count.index % length(var.envs))}-${element(var.apps, floor(count.index / length(var.envs)))}"
   location = local.region
 }
 

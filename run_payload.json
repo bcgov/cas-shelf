@@ -1,0 +1,13 @@
+{
+  "data": {
+    "type": "runs",
+    "relationships": {
+      "workspace": {
+        "data": {
+          "type": "workspaces",
+          "id": "ws-HeW7v4DXJ121TbdN"
+        }
+      }
+    }
+  }
+}

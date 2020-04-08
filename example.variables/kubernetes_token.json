@@ -1,0 +1,13 @@
+{
+  "data": {
+    "type": "vars",
+    "attributes": {
+      "key": "kubernetes_token",
+      "value": "kubernetes_token",
+      "description": "the authentication token of Openshift cluster",
+      "category": "terraform",
+      "hcl": false,
+      "sensitive": true
+    }
+  }
+}
