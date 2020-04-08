@@ -22,5 +22,5 @@ else
 fi
 
 for f in "$VARIABLE_DIRECTORY"*.json; do
-  ./bin/tf-create-or-update-variable.sh "$f" "$WORKSPACE_ID"
+  ./tfe-scripts/tf-create-or-update-variable.sh "$f" "$WORKSPACE_ID"
 done

@@ -1,5 +1,5 @@
-.PHONY: install-asdf-tools
-install-asdf-tools:
+.PHONY: install_asdf_tools
+install_asdf_tools:
 	@cat .tool-versions | cut -f 1 -d ' ' | xargs -n 1 asdf plugin-add || true
 	@asdf plugin-update --all
 	@bash ./.bin/import-nodejs-keyring.sh
@@ -9,17 +9,21 @@ install-asdf-tools:
 	@pip install -r requirements.txt
 	@asdf reshim
 
-.PHONY: create-workspace
-create-workspace:
+.PHONY: create_workspace
+create_workspace:
 	./tfe-scripts/tf-create-workspace-if-not-exist.sh $(org) $(workspace)
 	./tfe-scripts/tf-upload-workspace-configuration.sh ./bcgov $(org)/$(workspace)
 
-.PHONY: set-variables
-set-variables:
+.PHONY: delete_workspace
+delete_workspace:
+	./tfe-scripts/tf-delete-workspace.sh $(org) $(workspace)
+
+.PHONY: set_variables
+set_variables:
 	./tfe-scripts/tf-set-variables.sh ./variables/ $(org) $(workspace)
 
-.PHONY: add-app
-add-env:
+.PHONY: add_app
+add_app:
 	./tfe-scripts/tf-variable-add-to-set.sh $(workspace_id) apps $(env)
 
 .PHONY: run

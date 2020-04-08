@@ -11,12 +11,16 @@ and user-defined configure variables, folder `variables`.
 1. Install required tools via `asdf` (the versions are defined in `.tool-versions`).
 
 ```bash
-make install-asdf-tools
+make install_asdf_tools
 ```
 
 ### Set TF Cloud Token as an environment variable
 
 1. Create a new token via [`TFC User Settings > Tokens`](https://app.terraform.io/app/settings/tokens).
+   - Organization Token is not sufficient to process the scripts
+   ```
+   The organization API token is used to manage teams, team membership and workspaces. This token does not have permission to perform plans and applies in workspaces.
+   ```
 1. Set environment variable `TFC_TOKEN` for tfe scripts.
 
 ```bash
@@ -26,7 +30,7 @@ export TFC_TOKEN=...
 ### Create a new workspace and upload configuration files
 
 ```bash
-make create-workspace org=my-team workspace=my-workspace
+make create_workspace org=my-team workspace=my-workspace
 ```
 
 - It skips creating a new one if the specified name of workspace already exists.
@@ -42,13 +46,13 @@ make create-workspace org=my-team workspace=my-workspace
 1. Run TFE script to set the variables on TFC workspace.
 
 ```bash
-make set-variables org=my-team workspace=my-workspace
+make set_variables org=my-team workspace=my-workspace
 ```
 
 ### Trigger Run command to performs a plan & apply
 
 ```bash
-make run workspace_id=ws-xxxxxx
+make run org=my-team workspace=my-workspace
 ```
 
 - It sets `Apply Method` to `Auto apply` on workspace creation to skip manual user confirmations after planning in terms of API-driven run workflow.
