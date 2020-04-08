@@ -18,9 +18,9 @@ create-workspace:
 set-variables:
 	./tfe-scripts/tf-set-variables.sh ./variables/ $(org) $(workspace)
 
-.PHONY: add-env
+.PHONY: add-app
 add-env:
-	./tfe-scripts/tf-variable-add-to-set.sh $(workspace_id) envs $(env)
+	./tfe-scripts/tf-variable-add-to-set.sh $(workspace_id) apps $(env)
 
 .PHONY: run
 run:
