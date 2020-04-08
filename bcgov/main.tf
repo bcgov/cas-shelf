@@ -5,9 +5,20 @@ provider "kubernetes" {
   token            = var.kubernetes_token
 }
 
+data "template_file" "credentials" {
+  template = <<EOF
+{
+  "type":"service_account",
+  "project_id":"${var.project_id}",
+  "private_key":"${replace(var.credentials_private_key, "\n", "\\n")}",
+  "client_email":"${var.credentials_client_email}"
+}
+EOF
+}
+
 # Configure GCP infrastructure to setup the credentials, default project and location (zone and/or region) for your resources
 provider "google" {
-  credentials = var.credentials
+  credentials = data.template_file.credentials.rendered
   project     = var.project_id
   region      = local.region
 }

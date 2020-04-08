@@ -4,12 +4,16 @@ locals {
   region = "northamerica-northeast1" # Montreal
 }
 
-variable "credentials" {
-  description = "The service account private key of the GCP project as json string"
-}
-
 variable "project_id" {
   description = "The ID of the GCP project"
+}
+
+variable "credentials_private_key" {
+  description = "The private_key of GCP service account credentials key"
+}
+
+variable "credentials_client_email" {
+  description = "The client_email of GCP service account credentials key"
 }
 
 variable "kubernetes_host" {

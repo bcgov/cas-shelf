@@ -41,6 +41,14 @@ make create_workspace org=my-team workspace=my-workspace
 1. Copy `example.variables` folder to `variables` folder.
 1. Set each value in the vairable files. `data.attributes.value`.
 
+   - `project_id` the project id of Google Cloud Platform
+   - `credentials_private_key` the private_key of GCP service account credentials key
+   - `credentials_client_email` the client_email of GCP service account credentials key
+   - `kubernetes_host` the hostname of Openshift cluster
+   - `kubernetes_token` the authentication token of Openshift cluster
+   - `slug` the slug for Openshift cluster
+   - `apps` the list of application names of Openshift cluster
+   - `envs` the environment names of Openshift cluster, default to `["dev", "test", "prod", "tools"]`
    - Non-primitive data types must escape double quotes `"` > `\"`.
 
 1. Run TFE script to set the variables on TFC workspace.
