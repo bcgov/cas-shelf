@@ -11,7 +11,7 @@ ORG_NAME="$(cut -d'/' -f1 <<<"$2")"
 WORKSPACE_NAME="$(cut -d'/' -f2 <<<"$2")"
 
 # 2. Create or find the workspace and look up the ID
-WORKSPACE_ID=($(./bin/tf-create-workspace-if-not-exist.sh "$ORG_NAME" "$WORKSPACE_NAME"))
+WORKSPACE_ID=($(./tfe-scripts/tf-create-workspace-if-not-exist.sh "$ORG_NAME" "$WORKSPACE_NAME"))
 
 # 3. Create the file for upload
 UPLOAD_FILE_NAME="./content-$(date +%s).tar.gz"

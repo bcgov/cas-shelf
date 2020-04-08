@@ -27,3 +27,5 @@ curl \
   --request POST \
   --data @run_payload.json \
   https://app.terraform.io/api/v2/runs
+
+rm ./run_payload.json
