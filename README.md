@@ -16,11 +16,8 @@ make install_asdf_tools
 
 ### Set TF Cloud Token as an environment variable
 
-1. Create a new token via [`TFC User Settings > Tokens`](https://app.terraform.io/app/settings/tokens).
-   - Organization Token is not sufficient to process the scripts
-   ```
-   The organization API token is used to manage teams, team membership and workspaces. This token does not have permission to perform plans and applies in workspaces.
-   ```
+1. Create a new Team token via [`Settings > Teams > Team API Token`](https://app.terraform.io/app/thebuttonclan/settings/teams).
+
 1. Set environment variable `TFC_TOKEN` for tfe scripts.
 
 ```bash
@@ -50,6 +47,7 @@ make create_workspace org=my-team workspace=my-workspace
    - `apps` the list of application names of Openshift cluster
    - `envs` the environment names of Openshift cluster, default to `["dev", "test", "prod", "tools"]`
    - Non-primitive data types must escape double quotes `"` > `\"`.
+   - The GCP service account requires the roles `Storage Admin`, `Create Service Accounts`, `Delete Service Accounts`, and `Service Account Key Admin`.
 
 1. Run TFE script to set the variables on TFC workspace.
 
