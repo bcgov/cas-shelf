@@ -21,7 +21,7 @@ make install_asdf_tools
 1. Set environment variable `TFC_TOKEN` for tfe scripts.
 
 ```bash
-export TFC_TOKEN=...
+export TFC_TOKEN=<team-token>
 ```
 
 ### Create a new workspace and upload configuration files
@@ -32,11 +32,12 @@ make create_workspace org=my-team workspace=my-workspace
 
 - It skips creating a new one if the specified name of workspace already exists.
 - It compresses the main TF script folder `bcgov` and uploads to the workspace (non-VCS).
+- It sets placeholder variables from `variables` folder.
 
-### Set variables
+### Set variable values
 
-1. Copy `example.variables` folder to `variables` folder.
-1. Set each value in the vairable files. `data.attributes.value`.
+1. Copy `example.values` file to `.values` file.
+1. Set each value in `.values` file.
 
    - `project_id` the project id of Google Cloud Platform
    - `credentials_private_key` the private_key of GCP service account credentials key
@@ -52,7 +53,7 @@ make create_workspace org=my-team workspace=my-workspace
 1. Run TFE script to set the variables on TFC workspace.
 
 ```bash
-make set_variables org=my-team workspace=my-workspace
+make set_values org=my-team workspace=my-workspace
 ```
 
 ### Trigger Run command to performs a plan & apply

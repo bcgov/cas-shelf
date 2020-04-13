@@ -2,9 +2,9 @@
   "data": {
     "type": "vars",
     "attributes": {
-      "key": "apps",
-      "value": "[\"app1\"]",
-      "description": "the list of application names of Openshift cluster",
+      "key": "envs",
+      "value": "[]",
+      "description": "the environment names of Openshift cluster",
       "category": "terraform",
       "hcl": true,
       "sensitive": false

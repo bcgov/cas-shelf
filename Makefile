@@ -2,14 +2,15 @@
 create_workspace:
 	./tfe-scripts/tf-create-workspace-if-not-exist.sh $(org) $(workspace)
 	./tfe-scripts/tf-upload-workspace-configuration.sh ./bcgov $(org)/$(workspace)
+	./tfe-scripts/tf-set-variables.sh ./variables/ $(org) $(workspace)
 
 .PHONY: delete_workspace
 delete_workspace:
 	./tfe-scripts/tf-delete-workspace.sh $(org) $(workspace)
 
-.PHONY: set_variables
-set_variables:
-	./tfe-scripts/tf-set-variables.sh ./variables/ $(org) $(workspace)
+.PHONY: set_values
+set_values:
+	./tfe-scripts/tf-update-variable-values.sh ./.values $(org) $(workspace)
 
 .PHONY: add_app
 add_app:
