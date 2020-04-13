@@ -44,6 +44,7 @@ make create_workspace org=my-team workspace=my-workspace
    - `credentials_client_email` the client_email of GCP service account credentials key
    - `kubernetes_host` the hostname of Openshift cluster
    - `kubernetes_token` the authentication token of Openshift cluster
+     - Use [`Service Account Tokens`](https://docs.openshift.com/container-platform/3.5/rest_api/index.html#rest-api-serviceaccount-tokens) instead of `Session Tokens`, which is expiring within 24 hours by default.
    - `slug` the slug for Openshift cluster
    - `apps` the list of application names of Openshift cluster
    - `envs` the environment names of Openshift cluster, default to `["dev", "test", "prod", "tools"]`
