@@ -14,7 +14,7 @@ set_values:
 
 .PHONY: add_app
 add_app:
-	./tfe-scripts/tf-variable-add-to-set.sh $(workspace_id) apps $(env)
+	./tfe-scripts/tf-variable-add-to-set.sh $(workspace_id) namespace_apps $(app)
 
 .PHONY: run
 run:

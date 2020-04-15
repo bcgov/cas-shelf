@@ -2,7 +2,7 @@
   "data": {
     "type": "vars",
     "attributes": {
-      "key": "apps",
+      "key": "namespace_apps",
       "value": "[]",
       "description": "the list of application names of Openshift cluster",
       "category": "terraform",

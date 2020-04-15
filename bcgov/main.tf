@@ -24,45 +24,45 @@ provider "google" {
 }
 
 # Create GCS buckets
-resource "google_storage_bucket" "gc_bucket" {
-  count    = length(var.apps) * length(var.envs)
-  name     = "${var.slug}-${element(var.envs, count.index % length(var.envs))}-${element(var.apps, floor(count.index / length(var.envs)))}"
+resource "google_storage_bucket" "bucket" {
+  count    = length(var.namespace_apps)
+  name     = "${split(",", element(var.namespace_apps, count.index))[0]}-${split(",", element(var.namespace_apps, count.index))[1]}"
   location = local.region
 }
 
 # Create GCP service accounts for each GCS bucket
-resource "google_service_account" "gc_account" {
-  count        = length(google_storage_bucket.gc_bucket)
-  account_id   = "${google_storage_bucket.gc_bucket[count.index].name}-sa"
-  display_name = "${google_storage_bucket.gc_bucket[count.index].name} Service Account"
-  depends_on   = [google_storage_bucket.gc_bucket]
+resource "google_service_account" "account" {
+  count        = length(google_storage_bucket.bucket)
+  account_id   = "${google_storage_bucket.bucket[count.index].name}-sa"
+  display_name = "${google_storage_bucket.bucket[count.index].name} Service Account"
+  depends_on   = [google_storage_bucket.bucket]
 }
 
 # Assign Storage Admin role for the corresponding service accounts
-resource "google_storage_bucket_iam_member" "gc_editor" {
-  count      = length(google_storage_bucket.gc_bucket)
-  bucket     = google_storage_bucket.gc_bucket[count.index].name
+resource "google_storage_bucket_iam_member" "editor" {
+  count      = length(google_storage_bucket.bucket)
+  bucket     = google_storage_bucket.bucket[count.index].name
   role       = "roles/storage.admin"
-  member     = "serviceAccount:${google_service_account.gc_account[count.index].email}"
-  depends_on = [google_service_account.gc_account]
+  member     = "serviceAccount:${google_service_account.account[count.index].email}"
+  depends_on = [google_service_account.account]
 }
 
 # Create keys for the service accounts
-resource "google_service_account_key" "gc_key" {
-  count              = length(google_storage_bucket.gc_bucket)
-  service_account_id = google_service_account.gc_account[count.index].name
+resource "google_service_account_key" "key" {
+  count              = length(google_storage_bucket.bucket)
+  service_account_id = google_service_account.account[count.index].name
 }
 
 # https://docs.openshift.com/container-platform/3.7/dev_guide/secrets.html#types-of-secrets
 resource "kubernetes_secret" "secret_object" {
-  count = length(google_storage_bucket.gc_bucket)
+  count = length(google_storage_bucket.bucket)
   metadata {
-    name      = "gcp-${google_storage_bucket.gc_bucket[count.index].name}-service-account-key"
-    namespace = "${var.slug}-${element(var.envs, count.index % length(var.envs))}"
+    name      = "gcp-${google_storage_bucket.bucket[count.index].name}-service-account-key"
+    namespace = "${split(",", element(var.namespace_apps, count.index))[0]}"
   }
 
   data = {
-    "bucket-name"      = google_storage_bucket.gc_bucket[count.index].name
-    "credentials.json" = base64decode(google_service_account_key.gc_key[count.index].private_key)
+    "bucket-name"      = google_storage_bucket.bucket[count.index].name
+    "credentials.json" = base64decode(google_service_account_key.key[count.index].private_key)
   }
 }

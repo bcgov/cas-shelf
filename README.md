@@ -45,9 +45,7 @@ make create_workspace org=my-team workspace=my-workspace
    - `kubernetes_host` the hostname of Openshift cluster
    - `kubernetes_token` the authentication token of Openshift cluster
      - Use [`Service Account Tokens`](https://docs.openshift.com/container-platform/3.5/rest_api/index.html#rest-api-serviceaccount-tokens) instead of `Session Tokens`, which is expiring within 24 hours by default.
-   - `slug` the slug for Openshift cluster
-   - `apps` the list of application names of Openshift cluster
-   - `envs` the environment names of Openshift cluster, default to `["dev", "test", "prod", "tools"]`
+   - `namespace_apps` the list of namespace and app name pairs of Openshift cluster
    - Non-primitive data types must escape double quotes `"` > `\"`.
    - The GCP service account requires the roles `Storage Admin`, `Create Service Accounts`, `Delete Service Accounts`, and `Service Account Key Admin`.
 

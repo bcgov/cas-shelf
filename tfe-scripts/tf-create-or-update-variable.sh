@@ -8,6 +8,12 @@ fi
 PAYLOAD_FILE="$1"
 WORKSPACE_ID="$2"
 
+VAR_KEY=$(cat $PAYLOAD_FILE | jq -r '.data.attributes.key')
+if [ "$VAR_KEY" == null ]; then
+  echo "variable key not found"
+  exit 0
+fi
+
 VAR_ID=($(curl \
   --header "Authorization: Bearer $TFC_TOKEN" \
   --header "Content-Type: application/vnd.api+json" \
@@ -20,8 +26,6 @@ if [ "$VAR_ID" != null ]; then
   echo $VAR_ID
   exit 0
 fi
-
-VAR_KEY=$(cat $PAYLOAD_FILE | jq -r '.data.attributes.key')
 
 LIST_RESULT=($(curl \
   --header "Authorization: Bearer $TFC_TOKEN" \

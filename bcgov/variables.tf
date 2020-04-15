@@ -24,17 +24,7 @@ variable "kubernetes_token" {
   description = "The authentication token of the OCP cluster"
 }
 
-variable "slug" {
-  description = "The slug for the OCP cluster"
-}
-
-variable "apps" {
+variable "namespace_apps" {
   type        = list(string)
-  description = "The list of application names of the OCP project"
-}
-
-variable "envs" {
-  type        = list(string)
-  description = "The environment names of the OCP cluster"
-  default     = ["dev", "test", "prod", "tools"]
+  description = "The list of namespace and app name pairs of the OCP project"
 }

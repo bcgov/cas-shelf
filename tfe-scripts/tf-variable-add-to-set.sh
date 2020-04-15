@@ -33,16 +33,12 @@ for item in $(echo "${VALUE}" | base64 --decode | jq -r ".[]"); do
 done
 NEW_VALUE=$NEW_VALUE\\\"$ITEM\\\""]"
 
-echo "{\"data\":{\"attributes\":{\"value\":\"$NEW_VALUE\"}}}" >./new-array-variable.json
-
 VAR_ID=($(curl \
   --header "Authorization: Bearer $TFC_TOKEN" \
   --header "Content-Type: application/vnd.api+json" \
   --request PATCH \
-  --data @new-array-variable.json \
+  --data "{\"data\":{\"attributes\":{\"value\":\"$NEW_VALUE\"}}}" \
   https://app.terraform.io/api/v2/workspaces/$WORKSPACE_ID/vars/$VAR_ID |
   jq -r '.data.id'))
 
 echo $VAR_ID
-
-rm ./new-array-variable.json
