@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cas-shelf-tfe-add-app
+spec:
+  parallelism: 1
+  completions: 1
+  template:
+    metadata:
+      name: cas-shelf-tfe-add-app
+    spec:
+      containers:
+        - name: cas-shelf-tfe-add-app
+          resources:
+            limits:
+              cpu: '1'
+              memory: 1Gi
+            requests:
+              cpu: 500m
+              memory: 512Mi
+          image: docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:${GIT_COMMIT_SHA1}
+          env:
+            - name: TFC_TOKEN
+              value: ${TFC_TOKEN}
+            - name: TFC_WORKSPACE_ID
+              value: ${TFC_WORKSPACE_ID}
+          command: ["bash",  "/script.sh", "namespace,app"]
+      restartPolicy: Never

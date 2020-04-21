@@ -99,3 +99,7 @@ workflows:
       - deploy:
           requires:
             - unit
+          filters:
+            branches:
+              only:
+                - master
