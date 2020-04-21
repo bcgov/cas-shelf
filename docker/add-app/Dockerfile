@@ -8,4 +8,4 @@ RUN apt-get update --fix-missing -q  \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY ../tfe-scripts/tf-add-app-run.sh /script.sh
+COPY ./tfe-scripts/tf-add-app-run.sh /script.sh
