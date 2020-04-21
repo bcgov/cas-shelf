@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cas-shelf-tfe-add-app
+spec:
+  parallelism: 1
+  completions: 1
+  template:
+    metadata:
+      name: cas-shelf-tfe-add-app
+    spec:
+      containers:
+      - name: cas-shelf-tfe-add-app
+        image: docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:latest
+      restartPolicy: OnFailure

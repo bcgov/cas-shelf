@@ -13,6 +13,11 @@ LIST_RESULT=($(curl \
   --header "Content-Type: application/vnd.api+json" \
   "https://app.terraform.io/api/v2/workspaces/$TFC_WORKSPACE_ID/vars" | jq -r '. | @base64'))
 
+if [ "$LIST_RESULT" == null ]; then
+  echo "invalid workspace"
+  exit 0
+fi
+
 i=0
 for key in $(echo "${LIST_RESULT}" | base64 --decode | jq -r '.data[] .attributes.key'); do
   if [ "$VARIABLE_NAME" == "$key" ]; then
@@ -22,6 +27,12 @@ for key in $(echo "${LIST_RESULT}" | base64 --decode | jq -r '.data[] .attribute
 done
 
 VAR_ID=$(echo "${LIST_RESULT}" | base64 --decode | jq -r ".data[$i] .id")
+
+if [ "$VAR_ID" == null ]; then
+  echo "variable 'namespace_apps' not found"
+  exit 0
+fi
+
 VALUE=$(echo "${LIST_RESULT}" | base64 --decode | jq -r ".data[$i] .attributes.value | @base64")
 
 NEW_VALUE="["
