@@ -84,7 +84,7 @@ jobs:
           name: Push application Docker image
           command: |
             docker login docker.pkg.github.com -u $GITHUB_USERNAME -p $GITHUB_TOKEN
-            TARGET="docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:${CIRCLE_SHA1}"
+            TARGET="docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:${CIRCLE_TAG}"
             docker tag cas-shelf-tfe-add-app "$TARGET"
             docker push "$TARGET"
 
