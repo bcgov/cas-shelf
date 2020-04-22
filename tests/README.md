@@ -29,7 +29,7 @@ and the service account cannot:
 ### Steps
 
 1. `make setup`: It creates two new buckets with each scoped service account.
-1. `make test-node`: It runs Nodejs test files.
+1. `make test_node`: It runs Nodejs test files.
 1. `make destroy`: It removes the two buckets with service accounts created for testing.
    - It is recommanded to run this after testing to avoid conflicts in case of local test `Terraform` state is deleted.
 

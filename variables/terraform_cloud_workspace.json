@@ -1,0 +1,13 @@
+{
+  "data": {
+    "type": "vars",
+    "attributes": {
+      "key": "terraform_cloud_workspace_id",
+      "value": "terraform_cloud_workspace_id",
+      "description": "the workspace id of Terraform Cloud",
+      "category": "terraform",
+      "hcl": false,
+      "sensitive": false
+    }
+  }
+}

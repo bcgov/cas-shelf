@@ -34,7 +34,7 @@ terratest: dep
 terratest:
 	go test ./terratest/test/ $(TEST_CONTEXT)
 
-.PHONY: test-node
-test-node:
+.PHONY: test_node
+test_node:
 	yarn --cwd ./nodejs
 	yarn --cwd ./nodejs test

@@ -1,0 +1,7 @@
+project_id=project_id
+credentials_client_email=my-sa@my-storage.iam.gserviceaccount.com
+credentials_private_key=-----BEGIN PRIVATE KEY-----\n********\n-----END PRIVATE KEY-----\n
+kubernetes_host=kubernetes_host
+kubernetes_token=kubernetes_token
+namespace_apps=[\"namespace,app1\",\"namespace,app2\"]
+kubernetes_namespace=kubernetes_namespace

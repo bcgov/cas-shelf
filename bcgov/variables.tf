@@ -4,12 +4,16 @@ locals {
   region = "northamerica-northeast1" # Montreal
 }
 
-variable "credentials" {
-  description = "The service account private key of the GCP project as json string"
+variable "project_id" {
+  description = "The ID of the GCP project"
 }
 
-variable "project_name" {
-  description = "The ID of the GCP project"
+variable "credentials_private_key" {
+  description = "The private_key of GCP service account credentials key"
+}
+
+variable "credentials_client_email" {
+  description = "The client_email of GCP service account credentials key"
 }
 
 variable "kubernetes_host" {
@@ -20,17 +24,19 @@ variable "kubernetes_token" {
   description = "The authentication token of the OCP cluster"
 }
 
-variable "slug" {
-  description = "The slug for the OCP cluster"
+variable "kubernetes_namespace" {
+  description = "The OCP namespace to run jobs"
 }
 
-variable "application" {
-  type        = list(string)
-  description = "The list of application names of the OCP project"
+variable "terraform_cloud_token" {
+  description = "The user/team token of Terraform Cloud"
 }
 
-variable "envs" {
+variable "terraform_cloud_workspace_id" {
+  description = "The workspace id of Terraform Cloud"
+}
+
+variable "namespace_apps" {
   type        = list(string)
-  description = "The environment names of the OCP cluster"
-  default     = ["dev", "test", "prod", "tools"]
+  description = "The list of namespace and app name pairs of the OCP project"
 }
