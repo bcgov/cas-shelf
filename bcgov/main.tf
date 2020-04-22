@@ -54,7 +54,7 @@ resource "google_service_account_key" "key" {
 }
 
 # https://docs.openshift.com/container-platform/3.7/dev_guide/secrets.html#types-of-secrets
-resource "kubernetes_secret" "secret_object" {
+resource "kubernetes_secret" "secret_sa" {
   count = length(google_storage_bucket.bucket)
   metadata {
     name      = "gcp-${google_storage_bucket.bucket[count.index].name}-service-account-key"
@@ -62,7 +62,19 @@ resource "kubernetes_secret" "secret_object" {
   }
 
   data = {
-    "bucket-name"      = google_storage_bucket.bucket[count.index].name
+    "bucket_name"      = google_storage_bucket.bucket[count.index].name
     "credentials.json" = base64decode(google_service_account_key.key[count.index].private_key)
+  }
+}
+
+resource "kubernetes_secret" "secret_tfc" {
+  metadata {
+    name      = "terraform-cloud-workspace"
+    namespace = var.kubernetes_namespace
+  }
+
+  data = {
+    "token"        = var.terraform_cloud_token
+    "workspace_id" = var.terraform_cloud_workspace_id
   }
 }

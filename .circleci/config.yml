@@ -101,5 +101,4 @@ workflows:
             - unit
           filters:
             branches:
-              only:
-                - master
+              ignore: /.*/

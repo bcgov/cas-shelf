@@ -28,3 +28,6 @@ while IFS= read -r line; do
     ./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "$VAR_KEY" "$VAR_VAL"
   fi
 done < <(grep . "${VARIABLE_FILE}")
+
+./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" terraform_cloud_workspace_id "$WORKSPACE_ID"
+./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" terraform_cloud_token "$TFC_TOKEN"

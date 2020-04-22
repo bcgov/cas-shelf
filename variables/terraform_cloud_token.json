@@ -1,0 +1,13 @@
+{
+  "data": {
+    "type": "vars",
+    "attributes": {
+      "key": "terraform_cloud_token",
+      "value": "terraform_cloud_token",
+      "description": "the user/team token of Terraform Cloud",
+      "category": "terraform",
+      "hcl": false,
+      "sensitive": true
+    }
+  }
+}

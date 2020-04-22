@@ -24,6 +24,18 @@ variable "kubernetes_token" {
   description = "The authentication token of the OCP cluster"
 }
 
+variable "kubernetes_namespace" {
+  description = "The OCP namespace to run jobs"
+}
+
+variable "terraform_cloud_token" {
+  description = "The user/team token of Terraform Cloud"
+}
+
+variable "terraform_cloud_workspace_id" {
+  description = "The workspace id of Terraform Cloud"
+}
+
 variable "namespace_apps" {
   type        = list(string)
   description = "The list of namespace and app name pairs of the OCP project"

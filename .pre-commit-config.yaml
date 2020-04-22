@@ -13,4 +13,4 @@ repos:
     hooks:
       - id: terraform_fmt
       - id: terraform_docs
-      - id: terraform_validate_with_variables
+      # - id: terraform_validate_with_variables
