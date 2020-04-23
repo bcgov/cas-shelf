@@ -94,7 +94,6 @@ jobs:
           name: Push application Docker image
           command: |
             SEMVER_GET="./semver-tool/src/semver get"
-            CIRCLE_TAG=0.1.0-rc1
             MAJOR=$($SEMVER_GET major $CIRCLE_TAG)
             MINOR=$($SEMVER_GET minor $CIRCLE_TAG)
             PATCH=$($SEMVER_GET patch $CIRCLE_TAG)
@@ -127,21 +126,21 @@ workflows:
   version: 2
   test:
     jobs:
-      # - tools:
-      #     filters:
-      #       tags:
-      #         only: /.*/
-      # - unit:
-      #     requires:
-      #       - tools
-      #     filters:
-      #       tags:
-      #         only: /.*/
-      - deploy:
-          # requires:
-          # - unit
+      - tools:
           filters:
-            # branches:
-            # ignore: /.*/
+            tags:
+              only: /.*/
+      - unit:
+          requires:
+            - tools
+          filters:
+            tags:
+              only: /.*/
+      - deploy:
+          requires:
+          - unit
+          filters:
+            branches:
+            ignore: /.*/
             tags:
               only: /.*/
