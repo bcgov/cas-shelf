@@ -119,7 +119,7 @@ jobs:
 
             for TAG in ${ALL_TAGS}; do
               TARGET="docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:${TAG}"
-              docker tag cas-shelf-tfe-add-app ${TARGET}"
+              docker tag cas-shelf-tfe-add-app ${TARGET}
               docker push ${TARGET}
             done
 
