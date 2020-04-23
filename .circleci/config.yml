@@ -55,8 +55,7 @@ jobs:
       - image: docker:17.05.0-ce-git
     working_directory: ~/cas-shelf
     steps:
-      - attach_workspace:
-          at: ~/
+      - checkout
       - setup_remote_docker
       - restore_cache:
           keys:
@@ -84,8 +83,8 @@ jobs:
       - run:
           name: Install git-semver for versioning
           command: |
-            go get github.com/mdomke/git-semver
-            git-semver
+            git clone git@github.com:fsaintjacques/semver-tool.git
+            ./semver-tool/src/semver get major 1.1.1
       # - deploy:
       #     name: Push application Docker image
       #     command: |
