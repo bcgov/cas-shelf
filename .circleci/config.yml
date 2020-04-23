@@ -91,24 +91,35 @@ jobs:
           command: |
             git clone git@github.com:fsaintjacques/semver-tool.git
             SEMVER_GET="./semver-tool/src/semver get"
-            MAJOR=$($SEMVER_GET major 1.1.1)
-            echo $MAJOR
-      # - deploy:
-      #     name: Push application Docker image
-      #     command: |
-      #       docker login docker.pkg.github.com -u $GITHUB_USERNAME -p $GITHUB_TOKEN
-      #       TARGET="docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:${CIRCLE_TAG}"
-      #       docker tag cas-shelf-tfe-add-app "$TARGET"
-      #       docker push "$TARGET"
+            MAJOR=$($SEMVER_GET major $CIRCLE_TAG)
+            MINOR=$($SEMVER_GET minor $CIRCLE_TAG)
+            PATCH=$($SEMVER_GET patch $CIRCLE_TAG)
+            PRE=$($SEMVER_GET prerel $CIRCLE_TAG)
+
+            TAG1=${MAJOR}
+            TAG2=${MAJOR}.${MINOR}
+            TAG3=${MAJOR}.${MINOR}.${PATCH}
+            TAG4=${MAJOR}.${MINOR}.${PATCH}.${PRE}
+      - deploy:
+          name: Push application Docker image
+          command: |
+            echo $TAG1
+            echo $TAG2
+            echo $TAG3
+            echo $TAG4
+# docker login docker.pkg.github.com -u $GITHUB_USERNAME -p $GITHUB_TOKEN
+# TARGET="docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:${CIRCLE_TAG}"
+# docker tag cas-shelf-tfe-add-app "$TARGET"
+# docker push "$TARGET"
 
 workflows:
   version: 2
   test:
     jobs:
-      - tools:
-          filters:
-            tags:
-              only: /.*/
+      # - tools:
+      #     filters:
+      #       tags:
+      #         only: /.*/
       # - unit:
       #     requires:
       #       - tools
