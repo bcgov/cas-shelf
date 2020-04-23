@@ -33,34 +33,30 @@ jobs:
             - .bashrc
             - cas-shelf
 
-  # unit:
-  #   machine:
-  #     image: ubuntu-1604:201903-01
-  #   working_directory: ~/cas-shelf/tests
-  #   steps:
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         name: Run Terratest & Nodejs tests
-  #         command: |
-  #           source ~/.asdf/asdf.sh
-  #           make setup
-  #           make dep
-  #           make terratest
-  #           make test_node
-  #           make destroy
-  #     - persist_to_workspace:
-  #         root: ~/
-  #         paths:
-  #           - .asdf
-  #           - .bashrc
-  #           - cas-shelf
+  unit:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/cas-shelf/tests
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Run Terratest & Nodejs tests
+          command: |
+            source ~/.asdf/asdf.sh
+            make setup
+            make dep
+            make terratest
+            make test_node
+            make destroy
 
   deploy:
     docker:
       - image: docker:17.05.0-ce-git
     working_directory: ~/cas-shelf
     steps:
+      - attach_workspace:
+          at: ~/
       - setup_remote_docker
       - restore_cache:
           keys:
@@ -106,15 +102,15 @@ workflows:
           filters:
             tags:
               only: /.*/
-      # - unit:
-          # requires:
-            # - tools
-          # filters:
-            # tags:
-              # only: /.*/
+      - unit:
+          requires:
+            - tools
+          filters:
+            tags:
+              only: /.*/
       - deploy:
-          # requires:
-            # - unit
+          requires:
+            - unit
           filters:
             # branches:
               # ignore: /.*/
