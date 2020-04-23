@@ -81,7 +81,13 @@ jobs:
           paths:
             - /caches/cas-shelf-tfe-add-app.tar
       - run:
-          name: Install git-semver for versioning
+          name: Install bash to run semver
+          command: |
+            apk update
+            apk upgrade
+            apk add bash
+      - run:
+          name: Install semver for versioning
           command: |
             git clone git@github.com:fsaintjacques/semver-tool.git
             ./semver-tool/src/semver get major 1.1.1
