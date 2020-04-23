@@ -101,13 +101,18 @@ jobs:
             TAG2=${MAJOR}.${MINOR}
             TAG3=${MAJOR}.${MINOR}.${PATCH}
             TAG4=${MAJOR}.${MINOR}.${PATCH}.${PRE}
-      - deploy:
-          name: Push application Docker image
-          command: |
+
             echo $TAG1
             echo $TAG2
             echo $TAG3
             echo $TAG4
+      # - deploy:
+      #     name: Push application Docker image
+      #     command: |
+      #       echo $TAG1
+      #       echo $TAG2
+      #       echo $TAG3
+      #       echo $TAG4
 # docker login docker.pkg.github.com -u $GITHUB_USERNAME -p $GITHUB_TOKEN
 # TARGET="docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:${CIRCLE_TAG}"
 # docker tag cas-shelf-tfe-add-app "$TARGET"
