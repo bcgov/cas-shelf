@@ -92,10 +92,16 @@ workflows:
   version: 2
   test:
     jobs:
-      - tools
+      - tools:
+          filters:
+            tags:
+              only: /.*/
       - unit:
           requires:
             - tools
+          filters:
+            tags:
+              only: /.*/
       - deploy:
           requires:
             - unit
