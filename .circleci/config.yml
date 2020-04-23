@@ -124,7 +124,7 @@ jobs:
 
 workflows:
   version: 2
-  test:
+  test_and_deploy:
     jobs:
       - tools:
           filters:
@@ -141,6 +141,6 @@ workflows:
             - unit
           filters:
             branches:
-            ignore: /.*/
+              ignore: /.*/
             tags:
               only: /.*/
