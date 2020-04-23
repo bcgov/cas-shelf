@@ -49,13 +49,20 @@ jobs:
             make terratest
             make test_node
             make destroy
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - .asdf
+            - .bashrc
+            - cas-shelf
 
   deploy:
     docker:
       - image: docker:17.05.0-ce-git
     working_directory: ~/cas-shelf
     steps:
-      - checkout
+      - attach_workspace:
+          at: ~/
       - setup_remote_docker
       - restore_cache:
           keys:
@@ -80,13 +87,18 @@ jobs:
           key: v1-{{ .Branch }}-{{ epoch }}
           paths:
             - /caches/cas-shelf-tfe-add-app.tar
-      - deploy:
-          name: Push application Docker image
+      - run:
+          name: Install git-semver for versioning
           command: |
-            docker login docker.pkg.github.com -u $GITHUB_USERNAME -p $GITHUB_TOKEN
-            TARGET="docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:${CIRCLE_TAG}"
-            docker tag cas-shelf-tfe-add-app "$TARGET"
-            docker push "$TARGET"
+            go get github.com/mdomke/git-semver
+            git-semver
+      # - deploy:
+      #     name: Push application Docker image
+      #     command: |
+      #       docker login docker.pkg.github.com -u $GITHUB_USERNAME -p $GITHUB_TOKEN
+      #       TARGET="docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:${CIRCLE_TAG}"
+      #       docker tag cas-shelf-tfe-add-app "$TARGET"
+      #       docker push "$TARGET"
 
 workflows:
   version: 2
@@ -106,7 +118,7 @@ workflows:
           requires:
             - unit
           filters:
-            branches:
-              ignore: /.*/
+            # branches:
+              # ignore: /.*/
             tags:
               only: /.*/
