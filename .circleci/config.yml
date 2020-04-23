@@ -57,6 +57,16 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
+      - run:
+          name: Install bash to run semver
+          command: |
+            apk update
+            apk upgrade
+            apk add bash
+      - run:
+          name: Install semver for versioning
+          command: |
+            git clone git@github.com:fsaintjacques/semver-tool.git
       - restore_cache:
           keys:
             - v1-{{ .Branch }}
@@ -80,16 +90,9 @@ jobs:
           key: v1-{{ .Branch }}-{{ epoch }}
           paths:
             - /caches/cas-shelf-tfe-add-app.tar
-      - run:
-          name: Install bash to run semver
+      - deploy:
+          name: Push application Docker image
           command: |
-            apk update
-            apk upgrade
-            apk add bash
-      - run:
-          name: Install semver for versioning
-          command: |
-            git clone git@github.com:fsaintjacques/semver-tool.git
             SEMVER_GET="./semver-tool/src/semver get"
             CIRCLE_TAG=0.1.0-rc1
             MAJOR=$($SEMVER_GET major $CIRCLE_TAG)
@@ -100,23 +103,21 @@ jobs:
             TAG1=${MAJOR}
             TAG2=${MAJOR}.${MINOR}
             TAG3=${MAJOR}.${MINOR}.${PATCH}
-            TAG4=${MAJOR}.${MINOR}.${PATCH}.${PRE}
+            TAG4=${MAJOR}.${MINOR}.${PATCH}-${PRE}
 
-            echo $TAG1
-            echo $TAG2
-            echo $TAG3
-            echo $TAG4
-      # - deploy:
-      #     name: Push application Docker image
-      #     command: |
-      #       echo $TAG1
-      #       echo $TAG2
-      #       echo $TAG3
-      #       echo $TAG4
-# docker login docker.pkg.github.com -u $GITHUB_USERNAME -p $GITHUB_TOKEN
-# TARGET="docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:${CIRCLE_TAG}"
-# docker tag cas-shelf-tfe-add-app "$TARGET"
-# docker push "$TARGET"
+            ALL_TAGS=($TAG1 $TAG2 $TAG3 $TAG4)
+
+            if [ $CIRCLE_TAG != $TAG4 ]; then
+              ALL_TAGS+=( $CIRCLE_TAG )
+            fi
+
+            docker login docker.pkg.github.com -u $GITHUB_USERNAME -p $GITHUB_TOKEN
+
+            for t in ${ALL_TAGS[@]}; do
+              TARGET="docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:${t}"
+              docker tag cas-shelf-tfe-add-app "$TARGET"
+              docker push "$TARGET"
+            done
 
 workflows:
   version: 2
@@ -134,9 +135,9 @@ workflows:
       #         only: /.*/
       - deploy:
           # requires:
-            # - unit
+          # - unit
           filters:
             # branches:
-              # ignore: /.*/
+            # ignore: /.*/
             tags:
               only: /.*/
