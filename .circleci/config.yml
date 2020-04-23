@@ -108,15 +108,12 @@ jobs:
             ALL_TAGS=($TAG1 $TAG2 $TAG3 $TAG4)
 
             if [ $CIRCLE_TAG != $TAG4 ]; then
-              ALL_TAGS+=( $CIRCLE_TAG )
             fi
 
             docker login docker.pkg.github.com -u $GITHUB_USERNAME -p $GITHUB_TOKEN
 
             for t in ${ALL_TAGS[@]}; do
-              TARGET="docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:${t}"
-              docker tag cas-shelf-tfe-add-app "$TARGET"
-              docker push "$TARGET"
+              echo $t
             done
 
 workflows:
