@@ -61,9 +61,9 @@ jobs:
       - image: docker:17.05.0-ce-git
     working_directory: ~/cas-shelf
     steps:
+      - setup_remote_docker
       - attach_workspace:
           at: ~/
-      - setup_remote_docker
       - restore_cache:
           keys:
             - v1-{{ .Branch }}
