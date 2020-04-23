@@ -62,8 +62,6 @@ jobs:
     working_directory: ~/cas-shelf
     steps:
       - setup_remote_docker
-      - attach_workspace:
-          at: ~/
       - restore_cache:
           keys:
             - v1-{{ .Branch }}
