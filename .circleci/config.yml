@@ -91,6 +91,7 @@ jobs:
           command: |
             git clone git@github.com:fsaintjacques/semver-tool.git
             SEMVER_GET="./semver-tool/src/semver get"
+            CIRCLE_TAG=0.1.0-rc1
             MAJOR=$($SEMVER_GET major $CIRCLE_TAG)
             MINOR=$($SEMVER_GET minor $CIRCLE_TAG)
             PATCH=$($SEMVER_GET patch $CIRCLE_TAG)
