@@ -21,13 +21,42 @@ else
 fi
 
 while IFS= read -r line; do
-  VAR_KEY="$(cut -d'=' -f1 <<<"$line")"
-  VAR_VAL="$(cut -d'=' -f2- <<<"$line")"
+  var_key="$(cut -d'=' -f1 <<<"$line")"
+  var_val="$(cut -d'=' -f2- <<<"$line")"
 
-  if [ ! -z "$VAR_KEY" ] && [ ! -z "$VAR_VAL" ]; then
-    ./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "$VAR_KEY" "$VAR_VAL"
+  if [ ! -z "$var_key" ] && [ ! -z "$var_val" ]; then
+    if [ $var_key == "namespace_apps" ]; then
+      # create double quote escaped namespace_apps array string and collect namespaces
+      namespaces=()
+      namespace_apps="["
+      i=0
+      for value in $(echo "${var_val}" | jq -r '.[]'); do
+        namespaces+=( "$(cut -d',' -f1 <<<"$value")" )
+        if [ $i -ne 0 ]; then namespace_apps=$namespace_apps","; fi
+        namespace_apps=$namespace_apps\\\"$value\\\"
+        ((i = i + 1))
+      done
+      namespace_apps=$namespace_apps"]"
+
+      uniq_namespaces=($(printf "%s\n" "${namespaces[@]}" | sort -u | tr '\n' ' '))
+
+      # create double quote escaped unique namespace array string
+      kubernetes_namespaces="["
+      i=0
+      for namespace in "${uniq_namespaces[@]}"; do
+        if [ $i -ne 0 ]; then kubernetes_namespaces=$kubernetes_namespaces","; fi
+        kubernetes_namespaces=$kubernetes_namespaces\\\"$namespace\\\"
+        ((i = i + 1))
+      done
+      kubernetes_namespaces=$kubernetes_namespaces"]"
+
+      ./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "namespace_apps" "$namespace_apps"
+      ./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "kubernetes_namespaces" "$kubernetes_namespaces"
+    else
+      ./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "$var_key" "$var_val"
+    fi
   fi
 done < <(grep . "${VARIABLE_FILE}")
 
-./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" terraform_cloud_workspace_id "$WORKSPACE_ID"
-./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" terraform_cloud_token "$TFC_TOKEN"
+./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "terraform_cloud_workspace_id" "$WORKSPACE_ID"
+./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "terraform_cloud_token" "$TFC_TOKEN"

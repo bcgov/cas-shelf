@@ -58,7 +58,7 @@ resource "kubernetes_secret" "secret_sa" {
   count = length(google_storage_bucket.bucket)
   metadata {
     name      = "gcp-${google_storage_bucket.bucket[count.index].name}-service-account-key"
-    namespace = "${split(",", element(var.namespace_apps, count.index))[0]}"
+    namespace = split(",", element(var.namespace_apps, count.index))[0]
   }
 
   data = {
@@ -68,9 +68,10 @@ resource "kubernetes_secret" "secret_sa" {
 }
 
 resource "kubernetes_secret" "secret_tfc" {
+  count = length(var.kubernetes_namespaces)
   metadata {
     name      = "terraform-cloud-workspace"
-    namespace = var.kubernetes_namespace
+    namespace = element(var.kubernetes_namespaces, count.index)
   }
 
   data = {
