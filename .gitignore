@@ -10,3 +10,4 @@ tests/test-bucket-prefix
 tests/terratest/test/src
 tests/terratest/test/pkg
 .values
+credentials.json

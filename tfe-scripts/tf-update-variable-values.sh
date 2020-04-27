@@ -20,6 +20,10 @@ else
     jq -r '.data.id'))
 fi
 
+update_value () {
+  ./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "$1" "$2"
+}
+
 while IFS= read -r line; do
   var_key="$(cut -d'=' -f1 <<<"$line")"
   var_val="$(cut -d'=' -f2- <<<"$line")"
@@ -50,13 +54,27 @@ while IFS= read -r line; do
       done
       kubernetes_namespaces=$kubernetes_namespaces"]"
 
-      ./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "namespace_apps" "$namespace_apps"
-      ./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "kubernetes_namespaces" "$kubernetes_namespaces"
+      update_value "namespace_apps" "$namespace_apps"
+      update_value "kubernetes_namespaces" "$kubernetes_namespaces"
+
+    elif [ $var_key == "credentials_file" ]; then
+      project_id=$(cat $var_val | jq -r '.project_id')
+      client_email=$(cat $var_val | jq -r '.client_email')
+
+      # read value as json string to have new line characters as it is
+      # and strip first and last characters which are double quotes
+      private_key=$(cat $var_val | jq '.private_key')
+      length=${#private_key}-2
+      private_key=${private_key:1:$length}
+
+      update_value "project_id" "$project_id"
+      update_value "credentials_client_email" "$client_email"
+      update_value "credentials_private_key" "$private_key"
     else
-      ./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "$var_key" "$var_val"
+      update_value "$var_key" "$var_val"
     fi
   fi
 done < <(grep . "${VARIABLE_FILE}")
 
-./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "terraform_cloud_workspace_id" "$WORKSPACE_ID"
-./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "terraform_cloud_token" "$TFC_TOKEN"
+update_value "terraform_cloud_workspace_id" "$WORKSPACE_ID"
+update_value "terraform_cloud_token" "$TFC_TOKEN"
