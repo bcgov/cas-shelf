@@ -1,0 +1,13 @@
+{
+  "data": {
+    "type": "vars",
+    "attributes": {
+      "key": "kubernetes_namespaces",
+      "value": "[]",
+      "description": "The OCP namespaces to run jobs",
+      "category": "terraform",
+      "hcl": true,
+      "sensitive": false
+    }
+  }
+}
