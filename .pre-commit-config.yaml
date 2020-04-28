@@ -8,6 +8,10 @@ repos:
       - id: check-json
       - id: check-yaml
       - id: end-of-file-fixer
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 2.0.0
+    hooks:
+      - id: shellcheck
   - repo: git://github.com/antonbabenko/pre-commit-terraform
     rev: v1.11.0
     hooks:
