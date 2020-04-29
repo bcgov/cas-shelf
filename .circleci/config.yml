@@ -41,6 +41,20 @@ jobs:
             - .bashrc
             - cas-shelf
 
+  lint:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/cas-shelf
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Verify style with pre-commit
+          command: |
+            source ~/.asdf/asdf.sh
+            asdf reshim
+            pre-commit run --all-files
+
   unit:
     machine:
       image: ubuntu-1604:201903-01
@@ -144,9 +158,15 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - unit:
+      - lint:
           requires:
             - tools
+          filters:
+            tags:
+              only: /.*/
+      - unit:
+          requires:
+            - lint
           filters:
             tags:
               only: /.*/
