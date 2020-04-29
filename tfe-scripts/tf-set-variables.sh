@@ -6,21 +6,19 @@ if [ -z "$1" ] || [ -z "$2" ]; then
   exit 0
 fi
 
-VARIABLE_DIRECTORY=$1
+PWD="$(dirname "$0")"
+source "$PWD/helpers/tf-api.sh"
+
+VARIABLE_DIRECTORY="$1"
 
 if [ -z "$3" ]; then
-  WORKSPACE_ID=$2
+  WORKSPACE_ID="$2"
 else
   ORGANIZATION_NAME="$2"
   WORKSPACE_NAME="$3"
-  WORKSPACE_ID=($(curl \
-    --header "Authorization: Bearer $TFC_TOKEN" \
-    --header "Content-Type: application/vnd.api+json" \
-    https://app.terraform.io/api/v2/organizations/$ORGANIZATION_NAME/workspaces/$WORKSPACE_NAME |
-    jq -r '.data.id'))
-
+  WORKSPACE_ID="$(get_workspace_by_name "$ORGANIZATION_NAME" "$WORKSPACE_NAME" | base64 -d | jq -r '.data.id')"
 fi
 
 for f in "$VARIABLE_DIRECTORY"*.json; do
-  ./tfe-scripts/tf-create-or-update-variable.sh "$f" "$WORKSPACE_ID"
+  "$PWD"/tf-create-or-update-variable.sh "$f" "$WORKSPACE_ID"
 done

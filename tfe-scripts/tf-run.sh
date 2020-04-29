@@ -6,6 +6,8 @@ if [ -z "$1" ]; then
   exit 0
 fi
 
+source "$(dirname "$0")/helpers/tf-api.sh"
+
 IS_DESTROY="false"
 
 if [ -z "$2" ]; then
@@ -14,39 +16,13 @@ if [ -z "$2" ]; then
 else
   ORGANIZATION_NAME="$1"
   WORKSPACE_NAME="$2"
-  WORKSPACE_ID=($(curl \
-    --header "Authorization: Bearer $TFC_TOKEN" \
-    --header "Content-Type: application/vnd.api+json" \
-    https://app.terraform.io/api/v2/organizations/$ORGANIZATION_NAME/workspaces/$WORKSPACE_NAME |
-    jq -r '.data.id'))
+  WORKSPACE_ID="$(get_workspace_by_name "$ORGANIZATION_NAME" "$WORKSPACE_NAME" | base64 -d | jq -r '.data.id')"
   if [ "$3" == "--delete" ]; then IS_DESTROY="true"; fi
 fi
 
-echo "{
-  \"data\": {
-    \"type\": \"runs\",
-    \"attributes\": {
-      \"is-destroy\":$IS_DESTROY
-    },
-    \"relationships\": {
-      \"workspace\": {
-        \"data\": {
-          \"type\": \"workspaces\",
-          \"id\": \"$WORKSPACE_ID\"
-        }
-      }
-    }
-  }
-}" >./run_payload.json
+# shellcheck disable=SC2016
+RUN_PAYLOAD="$(jq -n --arg workspace_id "$WORKSPACE_ID" --arg is_destroy "$IS_DESTROY" '{"data":{"type":"runs","attributes":{"is-destroy":$is_destroy},"relationships":{"workspace":{"data":{"type":"workspaces","id":$workspace_id}}}}}')"
 
-RUN_ID=($(curl \
-  --header "Authorization: Bearer $TFC_TOKEN" \
-  --header "Content-Type: application/vnd.api+json" \
-  --request POST \
-  --data @run_payload.json \
-  https://app.terraform.io/api/v2/runs |
-  jq -r '.data.id'))
+RUN_ID="$(create_run "$RUN_PAYLOAD" | base64 -d | jq -r '.data.id')"
 
-echo $RUN_ID
-
-rm ./run_payload.json
+echo "$RUN_ID"

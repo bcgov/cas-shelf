@@ -6,22 +6,21 @@ if [ -z "$1" ] || [ -z "$2" ]; then
   exit 0
 fi
 
-VARIABLE_FILE=$1
+PWD="$(dirname "$0")"
+source "$PWD/helpers/tf-api.sh"
+
+VARIABLE_FILE="$1"
 
 if [ -z "$3" ]; then
-  WORKSPACE_ID=$2
+  WORKSPACE_ID="$2"
 else
   ORGANIZATION_NAME="$2"
   WORKSPACE_NAME="$3"
-  WORKSPACE_ID=($(curl \
-    --header "Authorization: Bearer $TFC_TOKEN" \
-    --header "Content-Type: application/vnd.api+json" \
-    https://app.terraform.io/api/v2/organizations/$ORGANIZATION_NAME/workspaces/$WORKSPACE_NAME |
-    jq -r '.data.id'))
+  WORKSPACE_ID="$(get_workspace_by_name "$ORGANIZATION_NAME" "$WORKSPACE_NAME" | base64 -d | jq -r '.data.id')"
 fi
 
-update_value () {
-  ./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "$1" "$2"
+update_value() {
+  "$PWD"/tf-update-variable-value.sh "$WORKSPACE_ID" "$1" "$2"
 }
 
 while IFS= read -r line; do
@@ -29,41 +28,20 @@ while IFS= read -r line; do
   var_val="$(cut -d'=' -f2- <<<"$line")"
 
   if [ ! -z "$var_key" ] && [ ! -z "$var_val" ]; then
-    if [ $var_key == "namespace_apps" ]; then
-      # create double quote escaped namespace_apps array string and collect namespaces
-      namespaces=()
-      namespace_apps="["
-      i=0
-      for value in $(echo "${var_val}" | jq -r '.[]'); do
-        namespaces+=( "$(cut -d',' -f1 <<<"$value")" )
-        if [ $i -ne 0 ]; then namespace_apps=$namespace_apps","; fi
-        namespace_apps=$namespace_apps\\\"$value\\\"
-        ((i = i + 1))
-      done
-      namespace_apps=$namespace_apps"]"
-
-      uniq_namespaces=($(printf "%s\n" "${namespaces[@]}" | sort -u | tr '\n' ' '))
-
-      # create double quote escaped unique namespace array string
-      kubernetes_namespaces="["
-      i=0
-      for namespace in "${uniq_namespaces[@]}"; do
-        if [ $i -ne 0 ]; then kubernetes_namespaces=$kubernetes_namespaces","; fi
-        kubernetes_namespaces=$kubernetes_namespaces\\\"$namespace\\\"
-        ((i = i + 1))
-      done
-      kubernetes_namespaces=$kubernetes_namespaces"]"
+    if [ "$var_key" == "namespace_apps" ]; then
+      namespace_apps="$(echo "$var_val" | jq ". | unique")"
+      kubernetes_namespaces="$(echo "$namespace_apps" | jq 'map(. | split(",")[0]) | unique')"
 
       update_value "namespace_apps" "$namespace_apps"
       update_value "kubernetes_namespaces" "$kubernetes_namespaces"
 
-    elif [ $var_key == "credentials_file" ]; then
-      project_id=$(cat $var_val | jq -r '.project_id')
-      client_email=$(cat $var_val | jq -r '.client_email')
+    elif [ "$var_key" == "credentials_file" ]; then
+      project_id="$(jq -r '.project_id' < "$var_val")"
+      client_email="$(jq -r '.client_email' < "$var_val")"
 
       # read value as json string to have new line characters as it is
       # and strip first and last characters which are double quotes
-      private_key=$(cat $var_val | jq '.private_key')
+      private_key="$(jq '.private_key' < "$var_val")"
       length=${#private_key}-2
       private_key=${private_key:1:$length}
 
