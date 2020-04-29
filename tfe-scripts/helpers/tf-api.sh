@@ -11,7 +11,7 @@ get_workspace_by_name() {
   curl \
   --header "$AUTHORIZATION" \
   --header "$CONTENT_TYPE" \
-  "${BASE_URL}/organizations/$ORGANIZATION_NAME/workspaces/$WORKSPACE_NAME" | jq -r '. | @base64'
+  "${BASE_URL}/organizations/$ORGANIZATION_NAME/workspaces/$WORKSPACE_NAME"
 }
 
 create_workspace() {
@@ -23,7 +23,7 @@ create_workspace() {
   --header "$CONTENT_TYPE" \
   --request POST \
   --data "$DATA" \
-  "${BASE_URL}/organizations/$ORGANIZATION_NAME/workspaces" | jq -r '. | @base64'
+  "${BASE_URL}/organizations/$ORGANIZATION_NAME/workspaces"
 }
 
 delete_workspace_by_name() {
@@ -43,7 +43,7 @@ list_vars() {
   curl \
   --header "$AUTHORIZATION" \
   --header "$CONTENT_TYPE" \
-  "${BASE_URL}/workspaces/$TFC_WORKSPACE_ID/vars" | jq -r '. | @base64'
+  "${BASE_URL}/workspaces/$TFC_WORKSPACE_ID/vars"
 }
 
 create_var() {
@@ -55,7 +55,7 @@ create_var() {
   --header "$CONTENT_TYPE" \
   --request POST \
   --data @"$PAYLOAD_FILE" \
-  "${BASE_URL}/workspaces/$WORKSPACE_ID/vars" | jq -r '. | @base64'
+  "${BASE_URL}/workspaces/$WORKSPACE_ID/vars"
 }
 
 update_var() {
@@ -68,7 +68,7 @@ update_var() {
   --header "$CONTENT_TYPE" \
   --request PATCH \
   --data "$DATA" \
-  "${BASE_URL}/workspaces/$WORKSPACE_ID/vars/$VAR_ID" | jq -r '. | @base64'
+  "${BASE_URL}/workspaces/$WORKSPACE_ID/vars/$VAR_ID"
 }
 
 create_run() {
@@ -79,7 +79,7 @@ create_run() {
   --header "$CONTENT_TYPE" \
   --request POST \
   --data "$DATA" \
-  "${BASE_URL}/runs" | jq -r '. | @base64'
+  "${BASE_URL}/runs"
 }
 
 get_run() {
@@ -87,7 +87,7 @@ get_run() {
 
   curl \
   --header "$AUTHORIZATION" \
-  "${BASE_URL}/runs/$RUN_ID" | jq -r '. | @base64'
+  "${BASE_URL}/runs/$RUN_ID"
 }
 
 create_configuration() {
@@ -99,7 +99,7 @@ create_configuration() {
   --header "$CONTENT_TYPE" \
   --request POST \
   --data "$DATA" \
-  "${BASE_URL}/workspaces/$WORKSPACE_ID/configuration-versions" | jq -r '. | @base64'
+  "${BASE_URL}/workspaces/$WORKSPACE_ID/configuration-versions"
 }
 
 upload_configuration() {

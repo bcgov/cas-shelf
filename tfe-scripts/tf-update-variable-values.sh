@@ -16,7 +16,7 @@ if [ -z "$3" ]; then
 else
   ORGANIZATION_NAME="$2"
   WORKSPACE_NAME="$3"
-  WORKSPACE_ID="$(get_workspace_by_name "$ORGANIZATION_NAME" "$WORKSPACE_NAME" | base64 -d | jq -r '.data.id')"
+  WORKSPACE_ID="$(get_workspace_by_name "$ORGANIZATION_NAME" "$WORKSPACE_NAME" | jq -r '.data.id')"
 fi
 
 update_value() {

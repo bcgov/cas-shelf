@@ -23,7 +23,7 @@ tar -zcvf "$UPLOAD_FILE_NAME" -C "$CONTENT_DIRECTORY" .
 # 4. Create a new configuration version
 DATA='{"data":{"type":"configuration-versions","attributes":{"auto-queue-runs":false}}}'
 
-UPLOAD_URL="$(create_configuration "$WORKSPACE_ID" "$DATA" | base64 -d | jq -r '.data.attributes."upload-url"')"
+UPLOAD_URL="$(create_configuration "$WORKSPACE_ID" "$DATA" | jq -r '.data.attributes."upload-url"')"
 
 # 5. Upload the configuration content file
 upload_configuration "$UPLOAD_URL" "$UPLOAD_FILE_NAME"

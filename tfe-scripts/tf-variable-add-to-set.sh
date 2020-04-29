@@ -13,7 +13,7 @@ ITEM="$3"
 
 LIST_RESULT="$(list_vars "$WORKSPACE_ID")"
 
-VAR_DATA="$(echo "$LIST_RESULT" | base64 -d | jq -r ".data[] | select(.attributes.key == \"$VARIABLE_NAME\") | .")"
+VAR_DATA="$(echo "$LIST_RESULT" | jq -r ".data[] | select(.attributes.key == \"$VARIABLE_NAME\") | .")"
 VAR_ID="$(echo "$VAR_DATA" | jq -r ".id")"
 VALUE="$(echo "$VAR_DATA" | jq -r ".attributes.value")"
 NEW_VALUE="$(echo "$VALUE" | jq ". + [\"$ITEM\"] | unique")"
@@ -21,6 +21,6 @@ NEW_VALUE="$(echo "$VALUE" | jq ". + [\"$ITEM\"] | unique")"
 # shellcheck disable=SC2016
 DATA="$(jq -n --arg new_value "$NEW_VALUE" '{"data":{"attributes":{"value":$new_value}}}')"
 
-VAR_ID="$(update_var "$WORKSPACE_ID" "$VAR_ID" "$DATA" | base64 -d | jq -r '.data.id')"
+VAR_ID="$(update_var "$WORKSPACE_ID" "$VAR_ID" "$DATA" | jq -r '.data.id')"
 
 echo "$VAR_ID"

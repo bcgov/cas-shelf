@@ -17,7 +17,7 @@ if [ "$LIST_RESULT" == null ]; then
   exit 0
 fi
 
-VAR_DATA="$(echo "$LIST_RESULT" | base64 -d | jq -r ".data[] | select(.attributes.key == \"$VARIABLE_NAME\") | .")"
+VAR_DATA="$(echo "$LIST_RESULT" | jq -r ".data[] | select(.attributes.key == \"$VARIABLE_NAME\") | .")"
 VAR_ID="$(echo "$VAR_DATA" | jq -r ".id")"
 
 if [ "$VAR_ID" == null ]; then
@@ -31,17 +31,17 @@ NEW_VALUE="$(echo "$VALUE" | jq ". + [\"$APP\"] | unique")"
 # shellcheck disable=SC2016
 DATA="$(jq -n --arg new_value "$NEW_VALUE" '{"data":{"attributes":{"value":$new_value}}}')"
 
-VAR_ID="$(update_var "$TFC_WORKSPACE_ID" "$VAR_ID" "$DATA" | base64 -d | jq -r '.data.id')"
+VAR_ID="$(update_var "$TFC_WORKSPACE_ID" "$VAR_ID" "$DATA" | jq -r '.data.id')"
 
 echo "$VAR_ID"
 
 # shellcheck disable=SC2016
 RUN_PAYLOAD="$(jq -n --arg workspace_id "$TFC_WORKSPACE_ID" '{"data":{"type":"runs","relationships":{"workspace":{"data":{"type":"workspaces","id":$workspace_id}}}}}')"
 
-RUN_ID="$(create_run "$RUN_PAYLOAD" | base64 -d | jq -r '.data.id')"
+RUN_ID="$(create_run "$RUN_PAYLOAD" | jq -r '.data.id')"
 
 get_status() {
-  STATUS="$(get_run "$RUN_ID" | base64 -d | jq -r '.data.attributes.status')"
+  STATUS="$(get_run "$RUN_ID" | jq -r '.data.attributes.status')"
 
   if [ "$STATUS" == "errored" ]; then return 1; fi
   if [ "$STATUS" == "applied" ]; then return 1; fi

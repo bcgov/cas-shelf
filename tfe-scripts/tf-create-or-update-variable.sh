@@ -17,7 +17,7 @@ if [ "$VAR_KEY" == null ]; then
   exit 0
 fi
 
-VAR_ID="$(create_var "$WORKSPACE_ID" "$PAYLOAD_FILE" | base64 -d | jq -r '.data.id')"
+VAR_ID="$(create_var "$WORKSPACE_ID" "$PAYLOAD_FILE" | jq -r '.data.id')"
 
 if [ "$VAR_ID" != null ]; then
   echo "$VAR_ID"
@@ -26,9 +26,9 @@ fi
 
 LIST_RESULT="$(list_vars "$WORKSPACE_ID")"
 
-VAR_DATA="$(echo "$LIST_RESULT" | base64 -d | jq -r ".data[] | select(.attributes.key == \"$VAR_KEY\") | .")"
+VAR_DATA="$(echo "$LIST_RESULT" | jq -r ".data[] | select(.attributes.key == \"$VAR_KEY\") | .")"
 VAR_ID="$(echo "$VAR_DATA" | jq -r ".id")"
 
-VAR_ID="$(update_var "$WORKSPACE_ID" "$VAR_ID" "@${PAYLOAD_FILE}" | base64 -d | jq -r '.data.id')"
+VAR_ID="$(update_var "$WORKSPACE_ID" "$VAR_ID" "@${PAYLOAD_FILE}" | jq -r '.data.id')"
 
 echo "$VAR_ID"

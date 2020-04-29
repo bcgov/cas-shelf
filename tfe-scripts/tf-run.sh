@@ -16,13 +16,13 @@ if [ -z "$2" ]; then
 else
   ORGANIZATION_NAME="$1"
   WORKSPACE_NAME="$2"
-  WORKSPACE_ID="$(get_workspace_by_name "$ORGANIZATION_NAME" "$WORKSPACE_NAME" | base64 -d | jq -r '.data.id')"
+  WORKSPACE_ID="$(get_workspace_by_name "$ORGANIZATION_NAME" "$WORKSPACE_NAME" | jq -r '.data.id')"
   if [ "$3" == "--delete" ]; then IS_DESTROY="true"; fi
 fi
 
 # shellcheck disable=SC2016
 RUN_PAYLOAD="$(jq -n --arg workspace_id "$WORKSPACE_ID" --arg is_destroy "$IS_DESTROY" '{"data":{"type":"runs","attributes":{"is-destroy":$is_destroy},"relationships":{"workspace":{"data":{"type":"workspaces","id":$workspace_id}}}}}')"
 
-RUN_ID="$(create_run "$RUN_PAYLOAD" | base64 -d | jq -r '.data.id')"
+RUN_ID="$(create_run "$RUN_PAYLOAD" | jq -r '.data.id')"
 
 echo "$RUN_ID"
