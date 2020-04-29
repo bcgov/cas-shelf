@@ -1,14 +1,18 @@
 #!/bin/bash
 
-if [ -z "$1" ]; then
-  echo "Usage: $0 <item>"
+if [ -z "$1" ] || [ -z "$2" ]; then
+  echo "Usage: $0 <namespace> <app>"
   exit 0
 fi
 
 source "$(dirname "$0")/helpers/tf-api.sh"
 
-VARIABLE_NAME="namespace_apps"
-APP="$1"
+NAMESPACE="$1"
+APP="$2"
+NAMESPACE_APP="${NAMESPACE},${APP}"
+
+VAR1="namespace_apps"
+VAR2="kubernetes_namespaces"
 
 LIST_RESULT="$(list_vars "$TFC_WORKSPACE_ID")"
 
@@ -17,23 +21,43 @@ if [ "$LIST_RESULT" == null ]; then
   exit 0
 fi
 
-VAR_DATA="$(echo "$LIST_RESULT" | jq -r ".data[] | select(.attributes.key == \"$VARIABLE_NAME\") | .")"
-VAR_ID="$(echo "$VAR_DATA" | jq -r ".id")"
+VAR_DATA1="$(echo "$LIST_RESULT" | jq -r ".data[] | select(.attributes.key == \"$VAR1\") | .")"
+VAR_ID1="$(echo "$VAR_DATA1" | jq -r ".id")"
 
-if [ "$VAR_ID" == null ]; then
-  echo "variable 'namespace_apps' not found"
+VAR_DATA2="$(echo "$LIST_RESULT" | jq -r ".data[] | select(.attributes.key == \"$VAR2\") | .")"
+VAR_ID2="$(echo "$VAR_DATA2" | jq -r ".id")"
+
+if [ "$VAR_ID1" == null ]; then
+  echo "variable $VAR1 not found"
   exit 0
 fi
 
-VALUE="$(echo "$VAR_DATA" | jq -r ".attributes.value")"
-NEW_VALUE="$(echo "$VALUE" | jq ". + [\"$APP\"] | unique")"
+if [ "$VAR_ID2" == null ]; then
+  echo "variable $VAR2 not found"
+  exit 0
+fi
+
+# update `namespace_apps`
+VALUE1="$(echo "$VAR_DATA1" | jq -r ".attributes.value")"
+NEW_VALUE1="$(echo "$VALUE1" | jq ". + [\"$NAMESPACE_APP\"] | unique")"
 
 # shellcheck disable=SC2016
-DATA="$(jq -n --arg new_value "$NEW_VALUE" '{"data":{"attributes":{"value":$new_value}}}')"
+DATA1="$(jq -n --arg new_value "$NEW_VALUE1" '{"data":{"attributes":{"value":$new_value}}}')"
 
-VAR_ID="$(update_var "$TFC_WORKSPACE_ID" "$VAR_ID" "$DATA" | jq -r '.data.id')"
+VAR_ID1="$(update_var "$TFC_WORKSPACE_ID" "$VAR_ID1" "$DATA1" | jq -r '.data.id')"
 
-echo "$VAR_ID"
+echo "$VAR_ID1"
+
+# update `kubernetes_namespaces`
+VALUE2="$(echo "$VAR_DATA2" | jq -r ".attributes.value")"
+NEW_VALUE2="$(echo "$VALUE2" | jq ". + [\"$NAMESPACE\"] | unique")"
+
+# shellcheck disable=SC2016
+DATA2="$(jq -n --arg new_value "$NEW_VALUE2" '{"data":{"attributes":{"value":$new_value}}}')"
+
+VAR_ID2="$(update_var "$TFC_WORKSPACE_ID" "$VAR_ID2" "$DATA2" | jq -r '.data.id')"
+
+echo "$VAR_ID2"
 
 # shellcheck disable=SC2016
 RUN_PAYLOAD="$(jq -n --arg workspace_id "$TFC_WORKSPACE_ID" '{"data":{"type":"runs","relationships":{"workspace":{"data":{"type":"workspaces","id":$workspace_id}}}}}')"
@@ -44,6 +68,7 @@ get_status() {
   STATUS="$(get_run "$RUN_ID" | jq -r '.data.attributes.status')"
 
   if [ "$STATUS" == "errored" ]; then return 1; fi
+  if [ "$STATUS" == "discarded" ]; then return 1; fi
   if [ "$STATUS" == "applied" ]; then return 1; fi
   if [ "$STATUS" == "planned_and_finished" ]; then return 1; fi
 }
