@@ -63,8 +63,7 @@ jobs:
       - run:
           name: "Pull Submodules"
           command: |
-            git submodule init
-            git submodule update --remote
+            git submodule update --init
       - run:
           name: Run Bats tests
           command: |
