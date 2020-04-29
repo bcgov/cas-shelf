@@ -24,6 +24,10 @@ run:
 destroy:
 	./tfe-scripts/tf-run.sh $(org) $(workspace) --delete
 
+.PHONY: test
+test:
+	bats ./tfe-scripts/test/unit/*.bats
+
 .PHONY: install_asdf_tools
 install_asdf_tools:
 	@cat .tool-versions | cut -f 1 -d ' ' | xargs -n 1 asdf plugin-add || true

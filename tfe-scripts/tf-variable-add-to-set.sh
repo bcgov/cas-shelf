@@ -12,7 +12,6 @@ VARIABLE_NAME="$2"
 ITEM="$3"
 
 LIST_RESULT="$(list_vars "$WORKSPACE_ID")"
-
 VAR_DATA="$(echo "$LIST_RESULT" | jq -r ".data[] | select(.attributes.key == \"$VARIABLE_NAME\") | .")"
 VAR_ID="$(echo "$VAR_DATA" | jq -r ".id")"
 VALUE="$(echo "$VAR_DATA" | jq -r ".attributes.value")"

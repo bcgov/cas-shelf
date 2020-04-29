@@ -1,0 +1,3 @@
+[submodule "tfe-scripts/test/helpers/shellmock"]
+	path = tfe-scripts/test/helpers/shellmock
+	url = git@github.com:capitalone/bash_shell_mock.git

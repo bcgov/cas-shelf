@@ -1,0 +1,38 @@
+{
+  "data": [
+    {
+      "id": "var-uniquehash1",
+      "type": "vars",
+      "attributes": {
+        "key": "variable_1",
+        "value": "some-value",
+        "sensitive": false,
+        "category": "terraform",
+        "hcl": false
+      },
+      "relationships": {
+        "configurable": {
+          "data": { "id": "ws-uniquehash", "type": "workspaces" }
+        }
+      },
+      "links": { "self": "/api/v2/workspaces/ws-uniquehash/vars/var-uniquehash1" }
+    },
+    {
+      "id": "var-uniquehash2",
+      "type": "vars",
+      "attributes": {
+        "key": "variable_2",
+        "value": "[\"slug-env1,app1\",\"slug-env1,app1\",\"slug-env2,app2\"]",
+        "sensitive": true,
+        "category": "terraform",
+        "hcl": false
+      },
+      "relationships": {
+        "configurable": {
+          "data": { "id": "ws-uniquehash", "type": "workspaces" }
+        }
+      },
+      "links": { "self": "/api/v2/workspaces/ws-uniquehash/vars/var-uniquehash2" }
+    }
+  ]
+}
