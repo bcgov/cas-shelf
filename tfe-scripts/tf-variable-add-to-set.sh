@@ -13,16 +13,9 @@ ITEM="$3"
 
 LIST_RESULT="$(list_vars "$WORKSPACE_ID")"
 
-i=0
-for key in $(echo "$LIST_RESULT" | base64 -d | jq -r '.data[] .attributes.key'); do
-  if [ "$VARIABLE_NAME" == "$key" ]; then
-    break
-  fi
-  ((i = i + 1))
-done
-
-VAR_ID="$(echo "$LIST_RESULT" | base64 -d | jq -r ".data[$i] .id")"
-VALUE="$(echo "$LIST_RESULT" | base64 -d | jq -r ".data[$i] .attributes.value")"
+VAR_DATA="$(echo "$LIST_RESULT" | base64 -d | jq -r ".data[] | select(.attributes.key == \"$VARIABLE_NAME\") | .")"
+VAR_ID="$(echo "$VAR_DATA" | jq -r ".id")"
+VALUE="$(echo "$VAR_DATA" | jq -r ".attributes.value")"
 NEW_VALUE="$(echo "$VALUE" | jq ". + [\"$ITEM\"] | unique")"
 
 # shellcheck disable=SC2016

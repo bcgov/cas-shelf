@@ -17,22 +17,15 @@ if [ "$LIST_RESULT" == null ]; then
   exit 0
 fi
 
-i=0
-for key in $(echo "$LIST_RESULT" | base64 -d | jq -r '.data[] .attributes.key'); do
-  if [ "$VARIABLE_NAME" == "$key" ]; then
-    break
-  fi
-  ((i = i + 1))
-done
-
-VAR_ID="$(echo "$LIST_RESULT" | base64 -d | jq -r ".data[$i] .id")"
+VAR_DATA="$(echo "$LIST_RESULT" | base64 -d | jq -r ".data[] | select(.attributes.key == \"$VARIABLE_NAME\") | .")"
+VAR_ID="$(echo "$VAR_DATA" | jq -r ".id")"
 
 if [ "$VAR_ID" == null ]; then
   echo "variable 'namespace_apps' not found"
   exit 0
 fi
 
-VALUE="$(echo "$LIST_RESULT" | base64 -d | jq -r ".data[$i] .attributes.value")"
+VALUE="$(echo "$VAR_DATA" | jq -r ".attributes.value")"
 NEW_VALUE="$(echo "$VALUE" | jq ". + [\"$APP\"] | unique")"
 
 # shellcheck disable=SC2016

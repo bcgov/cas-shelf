@@ -26,15 +26,8 @@ fi
 
 LIST_RESULT="$(list_vars "$WORKSPACE_ID")"
 
-i=0
-for key in $(echo "$LIST_RESULT" | base64 -d | jq -r '.data[] .attributes.key'); do
-  if [ "${VAR_KEY[0]}" == "$key" ]; then
-    break
-  fi
-  ((i = i + 1))
-done
-
-VAR_ID="$(echo "$LIST_RESULT" | base64 -d | jq -r ".data[$i] .id")"
+VAR_DATA="$(echo "$LIST_RESULT" | base64 -d | jq -r ".data[] | select(.attributes.key == \"$VAR_KEY\") | .")"
+VAR_ID="$(echo "$VAR_DATA" | jq -r ".id")"
 
 VAR_ID="$(update_var "$WORKSPACE_ID" "$VAR_ID" "@${PAYLOAD_FILE}" | base64 -d | jq -r '.data.id')"
 
