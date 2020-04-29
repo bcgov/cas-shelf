@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ -z "$1" ] || [ -z "$2" ]; then
+if [ "$#" -ne 2 ]; then
   echo "Usage: $0 <organization> <workspace>"
-  exit 0
+  exit 1
 fi
 
 source "$(dirname "$0")/helpers/tf-api.sh"

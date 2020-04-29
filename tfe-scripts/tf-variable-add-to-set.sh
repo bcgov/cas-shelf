@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+if [ "$#" -ne 3 ]; then
   echo "Usage: $0 <workspace_id> <variable_name> <item>"
-  exit 0
+  exit 1
 fi
 
 source "$(dirname "$0")/helpers/tf-api.sh"
@@ -17,6 +17,7 @@ VAR_ID="$(echo "$VAR_DATA" | jq -r ".id")"
 VALUE="$(echo "$VAR_DATA" | jq -r ".attributes.value")"
 NEW_VALUE="$(echo "$VALUE" | jq ". + [\"$ITEM\"] | unique")"
 
+# jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
 # shellcheck disable=SC2016
 DATA="$(jq -n --arg new_value "$NEW_VALUE" '{"data":{"attributes":{"value":$new_value}}}')"
 

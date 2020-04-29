@@ -3,7 +3,7 @@
 if [ -z "$1" ]; then
   echo "Usage: $0 <workspace_id> [--delete]"
   echo "Usage: $0 <organization> <workspace_name> [--delete]"
-  exit 0
+  exit 1
 fi
 
 source "$(dirname "$0")/helpers/tf-api.sh"
@@ -20,6 +20,7 @@ else
   if [ "$3" == "--delete" ]; then IS_DESTROY="true"; fi
 fi
 
+# jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
 # shellcheck disable=SC2016
 RUN_PAYLOAD="$(jq -n --arg workspace_id "$WORKSPACE_ID" --arg is_destroy "$IS_DESTROY" '{"data":{"type":"runs","attributes":{"is-destroy":$is_destroy},"relationships":{"workspace":{"data":{"type":"workspaces","id":$workspace_id}}}}}')"
 

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ -z "$1" ] || [ -z "$2" ]; then
+if [ "$#" -ne 2 ]; then
   echo "Usage: $0 <path_to_payload_file> <workspace_id>"
-  exit 0
+  exit 1
 fi
 
 source "$(dirname "$0")/helpers/tf-api.sh"
@@ -14,7 +14,7 @@ VAR_KEY="$(jq -r '.data.attributes.key' < "$PAYLOAD_FILE")"
 
 if [ "$VAR_KEY" == null ]; then
   echo "variable key not found"
-  exit 0
+  exit 1
 fi
 
 VAR_ID="$(create_var "$WORKSPACE_ID" "$PAYLOAD_FILE" | jq -r '.data.id')"

@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # 1. Define variables
-if [ -z "$1" ] || [ -z "$2" ]; then
+if [ "$#" -ne 2 ]; then
   echo "Usage: $0 <path_to_content_directory> <organization>/<workspace>"
-  exit 0
+  exit 1
 fi
 
 PWD="$(dirname "$0")"

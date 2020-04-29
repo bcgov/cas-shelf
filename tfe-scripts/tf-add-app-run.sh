@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ -z "$1" ] || [ -z "$2" ]; then
+if [ "$#" -ne 2 ]; then
   echo "Usage: $0 <namespace> <app>"
-  exit 0
+  exit 1
 fi
 
 source "$(dirname "$0")/helpers/tf-api.sh"
@@ -11,54 +11,57 @@ NAMESPACE="$1"
 APP="$2"
 NAMESPACE_APP="${NAMESPACE},${APP}"
 
-VAR1="namespace_apps"
-VAR2="kubernetes_namespaces"
+NAMESPACE_APPS_KEY="namespace_apps"
+NAMESPACES_KEY="kubernetes_namespaces"
 
 LIST_RESULT="$(list_vars "$TFC_WORKSPACE_ID")"
 
 if [ "$LIST_RESULT" == null ]; then
   echo "invalid workspace"
-  exit 0
+  exit 1
 fi
 
-VAR_DATA1="$(echo "$LIST_RESULT" | jq -r ".data[] | select(.attributes.key == \"$VAR1\") | .")"
-VAR_ID1="$(echo "$VAR_DATA1" | jq -r ".id")"
+NAPESPACE_APPS_DATA="$(echo "$LIST_RESULT" | jq -r ".data[] | select(.attributes.key == \"$NAMESPACE_APPS_KEY\") | .")"
+NAMESPACE_APPS_ID="$(echo "$NAPESPACE_APPS_DATA" | jq -r ".id")"
 
-VAR_DATA2="$(echo "$LIST_RESULT" | jq -r ".data[] | select(.attributes.key == \"$VAR2\") | .")"
-VAR_ID2="$(echo "$VAR_DATA2" | jq -r ".id")"
+NAMESPACES_DATA="$(echo "$LIST_RESULT" | jq -r ".data[] | select(.attributes.key == \"$NAMESPACES_KEY\") | .")"
+NAMESPACES_ID="$(echo "$NAMESPACES_DATA" | jq -r ".id")"
 
-if [ "$VAR_ID1" == null ]; then
-  echo "variable $VAR1 not found"
-  exit 0
+if [ "$NAMESPACE_APPS_ID" == null ]; then
+  echo "variable $NAMESPACE_APPS_KEY not found"
+  exit 1
 fi
 
-if [ "$VAR_ID2" == null ]; then
-  echo "variable $VAR2 not found"
-  exit 0
+if [ "$NAMESPACES_ID" == null ]; then
+  echo "variable $NAMESPACES_KEY not found"
+  exit 1
 fi
 
 # update `namespace_apps`
-VALUE1="$(echo "$VAR_DATA1" | jq -r ".attributes.value")"
-NEW_VALUE1="$(echo "$VALUE1" | jq ". + [\"$NAMESPACE_APP\"] | unique")"
+NAPESPACE_APPS_VALUE="$(echo "$NAPESPACE_APPS_DATA" | jq -r ".attributes.value")"
+NAPESPACE_APPS_NEW_VALUE="$(echo "$NAPESPACE_APPS_VALUE" | jq ". + [\"$NAMESPACE_APP\"] | unique")"
 
+# jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
 # shellcheck disable=SC2016
-DATA1="$(jq -n --arg new_value "$NEW_VALUE1" '{"data":{"attributes":{"value":$new_value}}}')"
+NAPESPACE_APPS_DATA_TO_UPDATE="$(jq -n --arg new_value "$NAPESPACE_APPS_NEW_VALUE" '{"data":{"attributes":{"value":$new_value}}}')"
 
-VAR_ID1="$(update_var "$TFC_WORKSPACE_ID" "$VAR_ID1" "$DATA1" | jq -r '.data.id')"
+NAMESPACE_APPS_ID="$(update_var "$TFC_WORKSPACE_ID" "$NAMESPACE_APPS_ID" "$NAPESPACE_APPS_DATA_TO_UPDATE" | jq -r '.data.id')"
 
-echo "$VAR_ID1"
+echo "$NAMESPACE_APPS_ID"
 
 # update `kubernetes_namespaces`
-VALUE2="$(echo "$VAR_DATA2" | jq -r ".attributes.value")"
-NEW_VALUE2="$(echo "$VALUE2" | jq ". + [\"$NAMESPACE\"] | unique")"
+NAMESPACES_VALUE="$(echo "$NAMESPACES_DATA" | jq -r ".attributes.value")"
+NAMESPACES_NEW_VALUE="$(echo "$NAMESPACES_VALUE" | jq ". + [\"$NAMESPACE\"] | unique")"
 
+# jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
 # shellcheck disable=SC2016
-DATA2="$(jq -n --arg new_value "$NEW_VALUE2" '{"data":{"attributes":{"value":$new_value}}}')"
+NAPESPACES_DATA_TO_UPDATE="$(jq -n --arg new_value "$NAMESPACES_NEW_VALUE" '{"data":{"attributes":{"value":$new_value}}}')"
 
-VAR_ID2="$(update_var "$TFC_WORKSPACE_ID" "$VAR_ID2" "$DATA2" | jq -r '.data.id')"
+NAMESPACES_ID="$(update_var "$TFC_WORKSPACE_ID" "$NAMESPACES_ID" "$NAPESPACES_DATA_TO_UPDATE" | jq -r '.data.id')"
 
-echo "$VAR_ID2"
+echo "$NAMESPACES_ID"
 
+# jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
 # shellcheck disable=SC2016
 RUN_PAYLOAD="$(jq -n --arg workspace_id "$TFC_WORKSPACE_ID" '{"data":{"type":"runs","relationships":{"workspace":{"data":{"type":"workspaces","id":$workspace_id}}}}}')"
 

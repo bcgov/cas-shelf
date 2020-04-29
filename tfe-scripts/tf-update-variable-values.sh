@@ -1,9 +1,9 @@
 #!/bin/bash
 
-if [ -z "$1" ] || [ -z "$2" ]; then
+if [ "$#" -lt 2 ]; then
   echo "Usage: $0 <path_to_variables_file> <workspace_id>"
   echo "Usage: $0 <path_to_variables_file> <organization> <workspace_name>"
-  exit 0
+  exit 1
 fi
 
 PWD="$(dirname "$0")"
