@@ -11,11 +11,6 @@ jobs:
     steps:
       - checkout:
           path: ~/cas-shelf
-      - run:
-          name: "Pull Submodules"
-          command: |
-            git submodule init
-            git submodule update --remote
       - restore_cache:
           name: Restore asdf Tools Cache
           keys:
@@ -73,6 +68,11 @@ jobs:
             make destroy
           working_directory: ~/cas-shelf/tests
       - orb-tools/install-bats
+      - run:
+          name: "Pull Submodules"
+          command: |
+            git submodule init
+            git submodule update --remote
       - run:
           name: Run Bats tests
           command: |
