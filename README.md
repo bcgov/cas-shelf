@@ -69,7 +69,7 @@ make run org=my-team workspace=my-workspace
 
 ### How to provision a new bucket for a new app during deployment process
 - In the process of setting variable values `.values`, it also creates Secret Objects containing Terraform Cloud workspace credentials in each Openshift namespace
-- In a Github tag push event, CI (CircleCI) publishes images encalsulating one of the TFC API script to provision a new app.
+- In a Github tag push event, CI (CircleCI) publishes images encapsulating one of the TFC API script to provision a new app.
    - https://github.com/bcgov/cas-shelf/packages/193931
 - There is `kubernetes job task` in a sub-directory `openshift` > `deploy` > `job`, which runs the image on Openshift cluster using the TFC workspace Secret Objet.
    - it requires one string argument includes namespace and app name separated by comma, `"namespace,app"` in `command` job attribute.
