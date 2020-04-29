@@ -2,6 +2,12 @@ version: 2.1
 
 orbs:
   orb-tools: circleci/orb-tools@8.27.4
+  shellcheck: circleci/shellcheck@1.3.15
+
+executors:
+  shellcheck:
+    docker:
+      - image: 'koalaman/shellcheck-alpine:v0.7.0'
 
 jobs:
   tools:
@@ -35,20 +41,6 @@ jobs:
             - .asdf
             - .bashrc
             - cas-shelf
-
-  lint:
-    machine:
-      image: ubuntu-1604:201903-01
-    working_directory: ~/cas-shelf
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Verify style with pre-commit
-          command: |
-            source ~/.asdf/asdf.sh
-            asdf reshim
-            pre-commit run --all-files
 
   unit:
     machine:
@@ -154,19 +146,18 @@ workflows:
   version: 2
   test_and_deploy:
     jobs:
+      - shellcheck/check:
+          pattern: '*.bats'
+          executor: 'shellcheck'
       - tools:
-          filters:
-            tags:
-              only: /.*/
-      - lint:
           requires:
-            - tools
+            - shellcheck/check
           filters:
             tags:
               only: /.*/
       - unit:
           requires:
-            - lint
+            - tools
           filters:
             tags:
               only: /.*/
