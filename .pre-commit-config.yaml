@@ -12,6 +12,7 @@ repos:
     rev: 2.0.0
     hooks:
       - id: shellcheck
+        files: ^tfe-scripts/
   - repo: git://github.com/antonbabenko/pre-commit-terraform
     rev: v1.11.0
     hooks:
