@@ -8,22 +8,22 @@ fi
 
 source "$(dirname "$0")/helpers/tf-api.sh"
 
-IS_DESTROY="false"
+is_destroy="false"
 
 if [ -z "$2" ]; then
-  WORKSPACE_ID=$1
-  if [ "$2" == "--delete" ]; then IS_DESTROY="true"; fi
+  workspace_id=$1
+  if [ "$2" == "--delete" ]; then is_destroy="true"; fi
 else
-  ORGANIZATION_NAME="$1"
-  WORKSPACE_NAME="$2"
-  WORKSPACE_ID="$(get_workspace_by_name "$ORGANIZATION_NAME" "$WORKSPACE_NAME" | jq -r '.data.id')"
-  if [ "$3" == "--delete" ]; then IS_DESTROY="true"; fi
+  organization_name="$1"
+  workspace_name="$2"
+  workspace_id="$(get_workspace_by_name "$organization_name" "$workspace_name" | jq -r '.data.id')"
+  if [ "$3" == "--delete" ]; then is_destroy="true"; fi
 fi
 
 # jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
 # shellcheck disable=SC2016
-RUN_PAYLOAD="$(jq -n --arg workspace_id "$WORKSPACE_ID" --arg is_destroy "$IS_DESTROY" '{"data":{"type":"runs","attributes":{"is-destroy":$is_destroy},"relationships":{"workspace":{"data":{"type":"workspaces","id":$workspace_id}}}}}')"
+run_payload="$(jq -n --arg workspace_id "$workspace_id" --arg is_destroy "$is_destroy" '{"data":{"type":"runs","attributes":{"is-destroy":$is_destroy},"relationships":{"workspace":{"data":{"type":"workspaces","id":$workspace_id}}}}}')"
 
-RUN_ID="$(create_run "$RUN_PAYLOAD" | jq -r '.data.id')"
+run_id="$(create_run "$run_payload" | jq -r '.data.id')"
 
-echo "$RUN_ID"
+echo "$run_id"

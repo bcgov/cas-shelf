@@ -6,27 +6,27 @@ if [ "$#" -ne 2 ]; then
   exit 1
 fi
 
-PWD="$(dirname "$0")"
-source "$PWD/helpers/tf-api.sh"
+pwd="$(dirname "$0")"
+source "$pwd/helpers/tf-api.sh"
 
-CONTENT_DIRECTORY="$1"
-ORG_NAME="$(cut -d'/' -f1 <<<"$2")"
-WORKSPACE_NAME="$(cut -d'/' -f2 <<<"$2")"
+content_directory="$1"
+org_name="$(cut -d'/' -f1 <<<"$2")"
+workspace_name="$(cut -d'/' -f2 <<<"$2")"
 
 # 2. Create or find the workspace and look up the ID
-WORKSPACE_ID="$("$PWD"/tf-create-workspace-if-not-exist.sh "$ORG_NAME" "$WORKSPACE_NAME")"
+workspace_id="$("$pwd"/tf-create-workspace-if-not-exist.sh "$org_name" "$workspace_name")"
 
 # 3. Create the file for upload
-UPLOAD_FILE_NAME="./content-$(date +%s).tar.gz"
-tar -zcvf "$UPLOAD_FILE_NAME" -C "$CONTENT_DIRECTORY" .
+upload_file_name="./content-$(date +%s).tar.gz"
+tar -zcvf "$upload_file_name" -c "$content_directory" .
 
 # 4. Create a new configuration version
-DATA='{"data":{"type":"configuration-versions","attributes":{"auto-queue-runs":false}}}'
+data='{"data":{"type":"configuration-versions","attributes":{"auto-queue-runs":false}}}'
 
-UPLOAD_URL="$(create_configuration "$WORKSPACE_ID" "$DATA" | jq -r '.data.attributes."upload-url"')"
+upload_url="$(create_configuration "$workspace_id" "$data" | jq -r '.data.attributes."upload-url"')"
 
 # 5. Upload the configuration content file
-upload_configuration "$UPLOAD_URL" "$UPLOAD_FILE_NAME"
+upload_configuration "$upload_url" "$upload_file_name"
 
 # 6. Delete temporary files
-rm "$UPLOAD_FILE_NAME"
+rm "$upload_file_name"

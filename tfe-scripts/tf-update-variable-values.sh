@@ -6,21 +6,21 @@ if [ "$#" -lt 2 ]; then
   exit 1
 fi
 
-PWD="$(dirname "$0")"
-source "$PWD/helpers/tf-api.sh"
+pwd="$(dirname "$0")"
+source "$pwd/helpers/tf-api.sh"
 
-VARIABLE_FILE="$1"
+variable_file="$1"
 
 if [ -z "$3" ]; then
-  WORKSPACE_ID="$2"
+  workspace_id="$2"
 else
-  ORGANIZATION_NAME="$2"
-  WORKSPACE_NAME="$3"
-  WORKSPACE_ID="$(get_workspace_by_name "$ORGANIZATION_NAME" "$WORKSPACE_NAME" | jq -r '.data.id')"
+  organization_name="$2"
+  workspace_name="$3"
+  workspace_id="$(get_workspace_by_name "$organization_name" "$workspace_name" | jq -r '.data.id')"
 fi
 
 update_value() {
-  "$PWD"/tf-update-variable-value.sh "$WORKSPACE_ID" "$1" "$2"
+  "$pwd"/tf-update-variable-value.sh "$workspace_id" "$1" "$2"
 }
 
 while IFS= read -r line; do
@@ -52,7 +52,7 @@ while IFS= read -r line; do
       update_value "$var_key" "$var_val"
     fi
   fi
-done < <(grep . "${VARIABLE_FILE}")
+done < <(grep . "${variable_file}")
 
-update_value "terraform_cloud_workspace_id" "$WORKSPACE_ID"
+update_value "terraform_cloud_workspace_id" "$workspace_id"
 update_value "terraform_cloud_token" "$TFC_TOKEN"

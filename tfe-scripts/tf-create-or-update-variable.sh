@@ -7,28 +7,28 @@ fi
 
 source "$(dirname "$0")/helpers/tf-api.sh"
 
-PAYLOAD_FILE="$1"
-WORKSPACE_ID="$2"
+payload_file="$1"
+workspace_id="$2"
 
-VAR_KEY="$(jq -r '.data.attributes.key' < "$PAYLOAD_FILE")"
+var_key="$(jq -r '.data.attributes.key' < "$payload_file")"
 
-if [ "$VAR_KEY" == null ]; then
+if [ "$var_key" == null ]; then
   echo "variable key not found"
   exit 1
 fi
 
-VAR_ID="$(create_var "$WORKSPACE_ID" "$PAYLOAD_FILE" | jq -r '.data.id')"
+var_id="$(create_var "$workspace_id" "$payload_file" | jq -r '.data.id')"
 
-if [ "$VAR_ID" != null ]; then
-  echo "$VAR_ID"
+if [ "$var_id" != null ]; then
+  echo "$var_id"
   exit 0
 fi
 
-LIST_RESULT="$(list_vars "$WORKSPACE_ID")"
+list_result="$(list_vars "$workspace_id")"
 
-VAR_DATA="$(echo "$LIST_RESULT" | jq -r ".data[] | select(.attributes.key == \"$VAR_KEY\") | .")"
-VAR_ID="$(echo "$VAR_DATA" | jq -r ".id")"
+var_data="$(echo "$list_result" | jq -r ".data[] | select(.attributes.key == \"$var_key\") | .")"
+var_id="$(echo "$var_data" | jq -r ".id")"
 
-VAR_ID="$(update_var "$WORKSPACE_ID" "$VAR_ID" "@${PAYLOAD_FILE}" | jq -r '.data.id')"
+var_id="$(update_var "$workspace_id" "$var_id" "@${payload_file}" | jq -r '.data.id')"
 
-echo "$VAR_ID"
+echo "$var_id"

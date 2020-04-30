@@ -7,7 +7,7 @@ fi
 
 source "$(dirname "$0")/helpers/tf-api.sh"
 
-ORGANIZATION_NAME="$1"
-WORKSPACE_NAME="$2"
+organization_name="$1"
+workspace_name="$2"
 
-delete_workspace_by_name "$ORGANIZATION_NAME" "$WORKSPACE_NAME"
+delete_workspace_by_name "$organization_name" "$workspace_name"

@@ -7,20 +7,20 @@ fi
 
 source "$(dirname "$0")/helpers/tf-api.sh"
 
-WORKSPACE_ID="$1"
-VARIABLE_NAME="$2"
-ITEM="$3"
+workspace_id="$1"
+variable_name="$2"
+item="$3"
 
-LIST_RESULT="$(list_vars "$WORKSPACE_ID")"
-VAR_DATA="$(echo "$LIST_RESULT" | jq -r ".data[] | select(.attributes.key == \"$VARIABLE_NAME\") | .")"
-VAR_ID="$(echo "$VAR_DATA" | jq -r ".id")"
-VALUE="$(echo "$VAR_DATA" | jq -r ".attributes.value")"
-NEW_VALUE="$(echo "$VALUE" | jq ". + [\"$ITEM\"] | unique")"
+list_result="$(list_vars "$workspace_id")"
+var_data="$(echo "$list_result" | jq -r ".data[] | select(.attributes.key == \"$variable_name\") | .")"
+var_id="$(echo "$var_data" | jq -r ".id")"
+value="$(echo "$var_data" | jq -r ".attributes.value")"
+new_value="$(echo "$value" | jq ". + [\"$item\"] | unique")"
 
 # jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
 # shellcheck disable=SC2016
-DATA="$(jq -n --arg new_value "$NEW_VALUE" '{"data":{"attributes":{"value":$new_value}}}')"
+data="$(jq -n --arg new_value "$new_value" '{"data":{"attributes":{"value":$new_value}}}')"
 
-VAR_ID="$(update_var "$WORKSPACE_ID" "$VAR_ID" "$DATA" | jq -r '.data.id')"
+var_id="$(update_var "$workspace_id" "$var_id" "$data" | jq -r '.data.id')"
 
-echo "$VAR_ID"
+echo "$var_id"

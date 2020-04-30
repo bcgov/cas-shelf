@@ -7,19 +7,19 @@ fi
 
 source "$(dirname "$0")/helpers/tf-api.sh"
 
-WORKSPACE_ID="$1"
-VAR_KEY="$2"
-VAR_VALUE="$3"
+workspace_id="$1"
+var_key="$2"
+var_value="$3"
 
-LIST_RESULT="$(list_vars "$WORKSPACE_ID")"
+list_result="$(list_vars "$workspace_id")"
 
-VAR_DATA="$(echo "$LIST_RESULT" | jq -r ".data[] | select(.attributes.key == \"$VAR_KEY\") | .")"
-VAR_ID="$(echo "$VAR_DATA" | jq -r ".id")"
+var_data="$(echo "$list_result" | jq -r ".data[] | select(.attributes.key == \"$var_key\") | .")"
+var_id="$(echo "$var_data" | jq -r ".id")"
 
 # jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
 # shellcheck disable=SC2016
-DATA="$(jq -n --arg var_value "$VAR_VALUE" '{"data":{"attributes":{"value":$var_value}}}')"
+data="$(jq -n --arg var_value "$var_value" '{"data":{"attributes":{"value":$var_value}}}')"
 
-VAR_ID="$(update_var "$WORKSPACE_ID" "$VAR_ID" "$DATA" | jq -r '.data.id')"
+var_id="$(update_var "$workspace_id" "$var_id" "$data" | jq -r '.data.id')"
 
-echo "$VAR_ID"
+echo "$var_id"

@@ -7,20 +7,20 @@ fi
 
 source "$(dirname "$0")/helpers/tf-api.sh"
 
-ORGANIZATION_NAME="$1"
-WORKSPACE_NAME="$2"
+organization_name="$1"
+workspace_name="$2"
 
-WORKSPACE_ID="$(get_workspace_by_name "$ORGANIZATION_NAME" "$WORKSPACE_NAME" | jq -r '.data.id')"
+workspace_id="$(get_workspace_by_name "$organization_name" "$workspace_name" | jq -r '.data.id')"
 
-if [ "$WORKSPACE_ID" != null ]; then
-  echo "$WORKSPACE_ID"
+if [ "$workspace_id" != null ]; then
+  echo "$workspace_id"
   exit 0
 fi
 
 # jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
 # shellcheck disable=SC2016
-DATA="$(jq -n --arg workspace_name "$WORKSPACE_NAME" '{"data":{"attributes":{"name":$workspace_name,"auto-apply":true},"type":"workspaces"}}')"
+data="$(jq -n --arg workspace_name "$workspace_name" '{"data":{"attributes":{"name":$workspace_name,"auto-apply":true},"type":"workspaces"}}')"
 
-WORKSPACE_ID="$(create_workspace "$ORGANIZATION_NAME" "$DATA" | jq -r '.data.id')"
+workspace_id="$(create_workspace "$organization_name" "$data" | jq -r '.data.id')"
 
-echo "$WORKSPACE_ID"
+echo "$workspace_id"

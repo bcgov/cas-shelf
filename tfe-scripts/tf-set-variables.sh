@@ -6,19 +6,19 @@ if [ "$#" -lt 2 ]; then
   exit 1
 fi
 
-PWD="$(dirname "$0")"
-source "$PWD/helpers/tf-api.sh"
+pwd="$(dirname "$0")"
+source "$pwd/helpers/tf-api.sh"
 
-VARIABLE_DIRECTORY="$1"
+variable_directory="$1"
 
 if [ -z "$3" ]; then
-  WORKSPACE_ID="$2"
+  workspace_id="$2"
 else
-  ORGANIZATION_NAME="$2"
-  WORKSPACE_NAME="$3"
-  WORKSPACE_ID="$(get_workspace_by_name "$ORGANIZATION_NAME" "$WORKSPACE_NAME" | jq -r '.data.id')"
+  organization_name="$2"
+  workspace_name="$3"
+  workspace_id="$(get_workspace_by_name "$organization_name" "$workspace_name" | jq -r '.data.id')"
 fi
 
-for f in "$VARIABLE_DIRECTORY"*.json; do
-  "$PWD"/tf-create-or-update-variable.sh "$f" "$WORKSPACE_ID"
+for f in "$variable_directory"*.json; do
+  "$pwd"/tf-create-or-update-variable.sh "$f" "$workspace_id"
 done
