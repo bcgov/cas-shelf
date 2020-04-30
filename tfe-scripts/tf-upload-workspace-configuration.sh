@@ -18,7 +18,7 @@ workspace_id="$("$pwd"/tf-create-workspace-if-not-exist.sh "$org_name" "$workspa
 
 # 3. Create the file for upload
 upload_file_name="./content-$(date +%s).tar.gz"
-tar -zcvf "$upload_file_name" -c "$content_directory" .
+tar -zcvf "$upload_file_name" -C "$content_directory" .
 
 # 4. Create a new configuration version
 data='{"data":{"type":"configuration-versions","attributes":{"auto-queue-runs":false}}}'
