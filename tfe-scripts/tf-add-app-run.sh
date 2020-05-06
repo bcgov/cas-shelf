@@ -10,9 +10,7 @@ source "$(dirname "$0")/helpers/tf-api.sh"
 namespace="$1"
 app="$2"
 namespace_app="${namespace},${app}"
-
 namespace_apps_key="namespace_apps"
-namespaces_key="kubernetes_namespaces"
 
 list_result="$(list_vars "$TFC_WORKSPACE_ID")"
 
@@ -24,16 +22,8 @@ fi
 napespace_apps_data="$(echo "$list_result" | jq -r ".data[] | select(.attributes.key == \"$namespace_apps_key\") | .")"
 namespace_apps_id="$(echo "$napespace_apps_data" | jq -r ".id")"
 
-namespaces_data="$(echo "$list_result" | jq -r ".data[] | select(.attributes.key == \"$namespaces_key\") | .")"
-namespaces_id="$(echo "$namespaces_data" | jq -r ".id")"
-
 if [ "$namespace_apps_id" == null ]; then
   echo "variable $namespace_apps_key not found"
-  exit 1
-fi
-
-if [ "$namespaces_id" == null ]; then
-  echo "variable $namespaces_key not found"
   exit 1
 fi
 
@@ -48,18 +38,6 @@ napespace_apps_data_to_update="$(jq -n --arg new_value "$napespace_apps_new_valu
 namespace_apps_id="$(update_var "$TFC_WORKSPACE_ID" "$namespace_apps_id" "$napespace_apps_data_to_update" | jq -r '.data.id')"
 
 echo "$namespace_apps_id"
-
-# update `kubernetes_namespaces`
-namespaces_value="$(echo "$namespaces_data" | jq -r ".attributes.value")"
-namespaces_new_value="$(echo "$namespaces_value" | jq ". + [\"$namespace\"] | unique")"
-
-# jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
-# shellcheck disable=SC2016
-napespaces_data_to_update="$(jq -n --arg new_value "$namespaces_new_value" '{"data":{"attributes":{"value":$new_value}}}')"
-
-namespaces_id="$(update_var "$TFC_WORKSPACE_ID" "$namespaces_id" "$napespaces_data_to_update" | jq -r '.data.id')"
-
-echo "$namespaces_id"
 
 # jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
 # shellcheck disable=SC2016

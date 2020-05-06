@@ -1,4 +1,5 @@
 credentials_file=credentials.json
 kubernetes_host=kubernetes_host
 kubernetes_token=kubernetes_token
+kubernetes_namespaces=["namespace1","namespace2"]
 namespace_apps=["namespace,app1","namespace,app2"]

@@ -32,3 +32,7 @@ spec:
                   name: terraform-cloud-workspace
           command: ["bash",  "/script.sh", "namespace", "app"]
       restartPolicy: Never
+
+# Usage
+# oc create -f cas-shelf-tfe-add-app.yml
+# oc delete -f cas-shelf-tfe-add-app.yml

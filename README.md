@@ -51,6 +51,7 @@ make create_workspace org=<my-team> workspace=<my-workspace>
    - `kubernetes_host`: the hostname of Openshift cluster
    - `kubernetes_token`: the authentication token of Openshift cluster
      - Use [`Service Account Tokens`](https://docs.openshift.com/container-platform/3.5/rest_api/index.html#rest-api-serviceaccount-tokens) instead of `Session Tokens`, which is expiring within 24 hours by default.
+   - `kubernetes_namespaces`: the list of Openshift namespaces to run jobs
    - `namespace_apps`: the list of namespace and app name pairs of Openshift cluster
 
 1. Run TFE script to set the variables on TFC workspace.
