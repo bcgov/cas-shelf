@@ -1,33 +1,58 @@
 #!/bin/bash
 
-if [ -z "$1" ] || [ -z "$2" ]; then
+if [ "$#" -lt 2 ]; then
   echo "Usage: $0 <path_to_variables_file> <workspace_id>"
   echo "Usage: $0 <path_to_variables_file> <organization> <workspace_name>"
-  exit 0
+  exit 1
 fi
 
-VARIABLE_FILE=$1
+pwd="$(dirname "$0")"
+source "$pwd/helpers/tf-api.sh"
+
+variable_file="$1"
 
 if [ -z "$3" ]; then
-  WORKSPACE_ID=$2
+  workspace_id="$2"
 else
-  ORGANIZATION_NAME="$2"
-  WORKSPACE_NAME="$3"
-  WORKSPACE_ID=($(curl \
-    --header "Authorization: Bearer $TFC_TOKEN" \
-    --header "Content-Type: application/vnd.api+json" \
-    https://app.terraform.io/api/v2/organizations/$ORGANIZATION_NAME/workspaces/$WORKSPACE_NAME |
-    jq -r '.data.id'))
+  organization_name="$2"
+  workspace_name="$3"
+  workspace_id="$(get_workspace_by_name "$organization_name" "$workspace_name" | jq -r '.data.id')"
 fi
 
+update_value() {
+  "$pwd"/tf-update-variable-value.sh "$workspace_id" "$1" "$2"
+}
+
 while IFS= read -r line; do
-  VAR_KEY="$(cut -d'=' -f1 <<<"$line")"
-  VAR_VAL="$(cut -d'=' -f2- <<<"$line")"
+  var_key="$(cut -d'=' -f1 <<<"$line")"
+  var_val="$(cut -d'=' -f2- <<<"$line")"
 
-  if [ ! -z "$VAR_KEY" ] && [ ! -z "$VAR_VAL" ]; then
-    ./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" "$VAR_KEY" "$VAR_VAL"
+  if [ ! -z "$var_key" ] && [ ! -z "$var_val" ]; then
+    if [ "$var_key" == "namespace_apps" ]; then
+      namespace_apps="$(echo "$var_val" | jq ". | unique")"
+      kubernetes_namespaces="$(echo "$namespace_apps" | jq 'map(. | split(",")[0]) | unique')"
+
+      update_value "namespace_apps" "$namespace_apps"
+      update_value "kubernetes_namespaces" "$kubernetes_namespaces"
+
+    elif [ "$var_key" == "credentials_file" ]; then
+      project_id="$(jq -r '.project_id' < "$var_val")"
+      client_email="$(jq -r '.client_email' < "$var_val")"
+
+      # read value as json string to have new line characters as it is
+      # and strip first and last characters which are double quotes
+      private_key="$(jq '.private_key' < "$var_val")"
+      length=${#private_key}-2
+      private_key=${private_key:1:$length}
+
+      update_value "project_id" "$project_id"
+      update_value "credentials_client_email" "$client_email"
+      update_value "credentials_private_key" "$private_key"
+    else
+      update_value "$var_key" "$var_val"
+    fi
   fi
-done < <(grep . "${VARIABLE_FILE}")
+done < <(grep . "${variable_file}")
 
-./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" terraform_cloud_workspace_id "$WORKSPACE_ID"
-./tfe-scripts/tf-update-variable-value.sh "$WORKSPACE_ID" terraform_cloud_token "$TFC_TOKEN"
+update_value "terraform_cloud_workspace_id" "$workspace_id"
+update_value "terraform_cloud_token" "$TFC_TOKEN"

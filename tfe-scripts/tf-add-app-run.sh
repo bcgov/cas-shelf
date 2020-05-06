@@ -1,81 +1,81 @@
 #!/bin/bash
 
-if [ -z "$1" ]; then
-  echo "Usage: $0 <item>"
-  exit 0
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 <namespace> <app>"
+  exit 1
 fi
 
-VARIABLE_NAME=namespace_apps
-APP="$1"
+source "$(dirname "$0")/helpers/tf-api.sh"
 
-LIST_RESULT=($(curl \
-  --header "Authorization: Bearer $TFC_TOKEN" \
-  --header "Content-Type: application/vnd.api+json" \
-  "https://app.terraform.io/api/v2/workspaces/$TFC_WORKSPACE_ID/vars" | jq -r '. | @base64'))
+namespace="$1"
+app="$2"
+namespace_app="${namespace},${app}"
 
-if [ "$LIST_RESULT" == null ]; then
+namespace_apps_key="namespace_apps"
+namespaces_key="kubernetes_namespaces"
+
+list_result="$(list_vars "$TFC_WORKSPACE_ID")"
+
+if [ "$list_result" == null ]; then
   echo "invalid workspace"
-  exit 0
+  exit 1
 fi
 
-i=0
-for key in $(echo "${LIST_RESULT}" | base64 --decode | jq -r '.data[] .attributes.key'); do
-  if [ "$VARIABLE_NAME" == "$key" ]; then
-    break
-  fi
-  ((i = i + 1))
-done
+napespace_apps_data="$(echo "$list_result" | jq -r ".data[] | select(.attributes.key == \"$namespace_apps_key\") | .")"
+namespace_apps_id="$(echo "$napespace_apps_data" | jq -r ".id")"
 
-VAR_ID=$(echo "${LIST_RESULT}" | base64 --decode | jq -r ".data[$i] .id")
+namespaces_data="$(echo "$list_result" | jq -r ".data[] | select(.attributes.key == \"$namespaces_key\") | .")"
+namespaces_id="$(echo "$namespaces_data" | jq -r ".id")"
 
-if [ "$VAR_ID" == null ]; then
-  echo "variable 'namespace_apps' not found"
-  exit 0
+if [ "$namespace_apps_id" == null ]; then
+  echo "variable $namespace_apps_key not found"
+  exit 1
 fi
 
-VALUE=$(echo "${LIST_RESULT}" | base64 --decode | jq -r ".data[$i] .attributes.value | @base64")
+if [ "$namespaces_id" == null ]; then
+  echo "variable $namespaces_key not found"
+  exit 1
+fi
 
-NEW_VALUE="["
-for item in $(echo "${VALUE}" | base64 --decode | jq -r ".[]"); do
-  if [ "$APP" != "$item" ]; then
-    NEW_VALUE=$NEW_VALUE\\\"$item\\\"","
-  fi
-done
-NEW_VALUE=$NEW_VALUE\\\"$APP\\\""]"
+# update `namespace_apps`
+napespace_apps_value="$(echo "$napespace_apps_data" | jq -r ".attributes.value")"
+napespace_apps_new_value="$(echo "$napespace_apps_value" | jq ". + [\"$namespace_app\"] | unique")"
 
-VAR_ID=($(curl \
-  --header "Authorization: Bearer $TFC_TOKEN" \
-  --header "Content-Type: application/vnd.api+json" \
-  --request PATCH \
-  --data "{\"data\":{\"attributes\":{\"value\":\"$NEW_VALUE\"}}}" \
-  https://app.terraform.io/api/v2/workspaces/$TFC_WORKSPACE_ID/vars/$VAR_ID |
-  jq -r '.data.id'))
+# jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
+# shellcheck disable=SC2016
+napespace_apps_data_to_update="$(jq -n --arg new_value "$napespace_apps_new_value" '{"data":{"attributes":{"value":$new_value}}}')"
 
-echo "var id"
-echo $VAR_ID
+namespace_apps_id="$(update_var "$TFC_WORKSPACE_ID" "$namespace_apps_id" "$napespace_apps_data_to_update" | jq -r '.data.id')"
 
-RUN_PAYLOAD="{\"data\":{\"type\":\"runs\",\"relationships\":{\"workspace\":{\"data\":{\"type\":\"workspaces\",\"id\":\"$TFC_WORKSPACE_ID\"}}}}}"
+echo "$namespace_apps_id"
 
-RUN_ID=($(curl \
-  --header "Authorization: Bearer $TFC_TOKEN" \
-  --header "Content-Type: application/vnd.api+json" \
-  --request POST \
-  --data $RUN_PAYLOAD \
-  https://app.terraform.io/api/v2/runs |
-  jq -r '.data.id'))
+# update `kubernetes_namespaces`
+namespaces_value="$(echo "$namespaces_data" | jq -r ".attributes.value")"
+namespaces_new_value="$(echo "$namespaces_value" | jq ". + [\"$namespace\"] | unique")"
+
+# jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
+# shellcheck disable=SC2016
+napespaces_data_to_update="$(jq -n --arg new_value "$namespaces_new_value" '{"data":{"attributes":{"value":$new_value}}}')"
+
+namespaces_id="$(update_var "$TFC_WORKSPACE_ID" "$namespaces_id" "$napespaces_data_to_update" | jq -r '.data.id')"
+
+echo "$namespaces_id"
+
+# jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
+# shellcheck disable=SC2016
+run_payload="$(jq -n --arg workspace_id "$TFC_WORKSPACE_ID" '{"data":{"type":"runs","relationships":{"workspace":{"data":{"type":"workspaces","id":$workspace_id}}}}}')"
+
+run_id="$(create_run "$run_payload" | jq -r '.data.id')"
 
 get_status() {
-  RESULT=($(curl \
-    --header "Authorization: Bearer $TFC_TOKEN" \
-    "https://app.terraform.io/api/v2/runs/$RUN_ID" | jq -r '. | @base64'))
+  status="$(get_run "$run_id" | jq -r '.data.attributes.status')"
 
-  STATUS=$(echo "${RESULT}" | base64 --decode | jq -r '.data.attributes.status')
-
-  if [ "$STATUS" == "errored" ]; then return 1; fi
-  if [ "$STATUS" == "applied" ]; then return 1; fi
-  if [ "$STATUS" == "planned_and_finished" ]; then return 1; fi
+  if [ "$status" == "errored" ]; then return 1; fi
+  if [ "$status" == "discarded" ]; then return 1; fi
+  if [ "$status" == "applied" ]; then return 1; fi
+  if [ "$status" == "planned_and_finished" ]; then return 1; fi
 }
 
 while get_status; do sleep 5; done
 
-echo $STATUS
+echo "$status"

@@ -1,5 +1,14 @@
 version: 2.1
 
+orbs:
+  orb-tools: circleci/orb-tools@8.27.4
+  shellcheck: circleci/shellcheck@1.3.15
+
+executors:
+  shellcheck:
+    docker:
+      - image: 'koalaman/shellcheck-alpine:v0.7.0'
+
 jobs:
   tools:
     machine:
@@ -36,7 +45,7 @@ jobs:
   unit:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/cas-shelf/tests
+    working_directory: ~/cas-shelf
     steps:
       - attach_workspace:
           at: ~/
@@ -49,6 +58,16 @@ jobs:
             make terratest
             make test_node
             make destroy
+          working_directory: ~/cas-shelf/tests
+      - orb-tools/install-bats
+      - run:
+          name: "Pull Submodules"
+          command: |
+            git submodule update --init
+      - run:
+          name: Run Bats tests
+          command: |
+            make test
 
   deploy:
     docker:
@@ -126,7 +145,12 @@ workflows:
   version: 2
   test_and_deploy:
     jobs:
+      - shellcheck/check:
+          pattern: '*.bats'
+          executor: 'shellcheck'
       - tools:
+          requires:
+            - shellcheck/check
           filters:
             tags:
               only: /.*/

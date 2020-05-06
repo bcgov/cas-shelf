@@ -1,44 +1,26 @@
 #!/bin/bash
 
-if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+if [ "$#" -ne 3 ]; then
   echo "Usage: $0 <workspace_id> <variable_name> <item>"
-  exit 0
+  exit 1
 fi
 
-WORKSPACE_ID="$1"
-VARIABLE_NAME="$2"
-ITEM="$3"
+source "$(dirname "$0")/helpers/tf-api.sh"
 
-LIST_RESULT=($(curl \
-  --header "Authorization: Bearer $TFC_TOKEN" \
-  --header "Content-Type: application/vnd.api+json" \
-  "https://app.terraform.io/api/v2/workspaces/$WORKSPACE_ID/vars" | jq -r '. | @base64'))
+workspace_id="$1"
+variable_name="$2"
+item="$3"
 
-i=0
-for key in $(echo "${LIST_RESULT}" | base64 --decode | jq -r '.data[] .attributes.key'); do
-  if [ "$VARIABLE_NAME" == "$key" ]; then
-    break
-  fi
-  ((i = i + 1))
-done
+list_result="$(list_vars "$workspace_id")"
+var_data="$(echo "$list_result" | jq -r ".data[] | select(.attributes.key == \"$variable_name\") | .")"
+var_id="$(echo "$var_data" | jq -r ".id")"
+value="$(echo "$var_data" | jq -r ".attributes.value")"
+new_value="$(echo "$value" | jq ". + [\"$item\"] | unique")"
 
-VAR_ID=$(echo "${LIST_RESULT}" | base64 --decode | jq -r ".data[$i] .id")
-VALUE=$(echo "${LIST_RESULT}" | base64 --decode | jq -r ".data[$i] .attributes.value | @base64")
+# jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
+# shellcheck disable=SC2016
+data="$(jq -n --arg new_value "$new_value" '{"data":{"attributes":{"value":$new_value}}}')"
 
-NEW_VALUE="["
-for item in $(echo "${VALUE}" | base64 --decode | jq -r ".[]"); do
-  if [ "$ITEM" != "$item" ]; then
-    NEW_VALUE=$NEW_VALUE\\\"$item\\\"","
-  fi
-done
-NEW_VALUE=$NEW_VALUE\\\"$ITEM\\\""]"
+var_id="$(update_var "$workspace_id" "$var_id" "$data" | jq -r '.data.id')"
 
-VAR_ID=($(curl \
-  --header "Authorization: Bearer $TFC_TOKEN" \
-  --header "Content-Type: application/vnd.api+json" \
-  --request PATCH \
-  --data "{\"data\":{\"attributes\":{\"value\":\"$NEW_VALUE\"}}}" \
-  https://app.terraform.io/api/v2/workspaces/$WORKSPACE_ID/vars/$VAR_ID |
-  jq -r '.data.id'))
-
-echo $VAR_ID
+echo "$var_id"

@@ -12,6 +12,10 @@ delete_workspace:
 set_values:
 	./tfe-scripts/tf-update-variable-values.sh ./.values $(org) $(workspace)
 
+.PHONY: sync_values
+sync_values:
+	./tfe-scripts/tf-sync-values.sh ./.values $(org) $(workspace)
+
 .PHONY: add_app
 add_app:
 	./tfe-scripts/tf-variable-add-to-set.sh $(workspace_id) namespace_apps $(app)
@@ -23,6 +27,10 @@ run:
 .PHONY: destroy
 destroy:
 	./tfe-scripts/tf-run.sh $(org) $(workspace) --delete
+
+.PHONY: test
+test:
+	bats ./tfe-scripts/test/unit/*.bats
 
 .PHONY: install_asdf_tools
 install_asdf_tools:

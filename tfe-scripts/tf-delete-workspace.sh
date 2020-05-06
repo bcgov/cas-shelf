@@ -1,15 +1,13 @@
 #!/bin/bash
 
-if [ -z "$1" ] || [ -z "$2" ]; then
+if [ "$#" -ne 2 ]; then
   echo "Usage: $0 <organization> <workspace>"
-  exit 0
+  exit 1
 fi
 
-ORGANIZATION_NAME="$1"
-WORKSPACE_NAME="$2"
+source "$(dirname "$0")/helpers/tf-api.sh"
 
-curl \
-  --header "Authorization: Bearer $TFC_TOKEN" \
-  --header "Content-Type: application/vnd.api+json" \
-  --request DELETE \
-  https://app.terraform.io/api/v2/organizations/$ORGANIZATION_NAME/workspaces/$WORKSPACE_NAME
+organization_name="$1"
+workspace_name="$2"
+
+delete_workspace_by_name "$organization_name" "$workspace_name"

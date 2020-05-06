@@ -1,39 +1,25 @@
 #!/bin/bash
 
-if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+if [ "$#" -ne 3 ]; then
   echo "Usage: $0 <workspace_id> <var_key> <var_value>"
-  exit 0
+  exit 1
 fi
 
-WORKSPACE_ID="$1"
-VAR_KEY="$2"
-VAR_VALUE="$3"
+source "$(dirname "$0")/helpers/tf-api.sh"
 
-LIST_RESULT=($(curl \
-  --header "Authorization: Bearer $TFC_TOKEN" \
-  --header "Content-Type: application/vnd.api+json" \
-  "https://app.terraform.io/api/v2/workspaces/$WORKSPACE_ID/vars" | jq -r '. | @base64'))
+workspace_id="$1"
+var_key="$2"
+var_value="$3"
 
-i=0
-for key in $(echo "${LIST_RESULT}" | base64 --decode | jq -r '.data[] .attributes.key'); do
-  if [ "$VAR_KEY" == "$key" ]; then
-    break
-  fi
-  ((i = i + 1))
-done
+list_result="$(list_vars "$workspace_id")"
 
-VAR_ID=$(echo "${LIST_RESULT}" | base64 --decode | jq -r ".data[$i] .id")
+var_data="$(echo "$list_result" | jq -r ".data[] | select(.attributes.key == \"$var_key\") | .")"
+var_id="$(echo "$var_data" | jq -r ".id")"
 
-echo "{\"data\":{\"attributes\":{\"value\":\"$VAR_VALUE\"}}}" >./variable.json
+# jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
+# shellcheck disable=SC2016
+data="$(jq -n --arg var_value "$var_value" '{"data":{"attributes":{"value":$var_value}}}')"
 
-VAR_ID=($(curl \
-  --header "Authorization: Bearer $TFC_TOKEN" \
-  --header "Content-Type: application/vnd.api+json" \
-  --request PATCH \
-  --data @variable.json \
-  https://app.terraform.io/api/v2/workspaces/$WORKSPACE_ID/vars/$VAR_ID |
-  jq -r '.data.id'))
+var_id="$(update_var "$workspace_id" "$var_id" "$data" | jq -r '.data.id')"
 
-echo $VAR_ID
-
-rm ./variable.json
+echo "$var_id"

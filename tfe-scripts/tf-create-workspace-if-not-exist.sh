@@ -1,34 +1,26 @@
 #!/bin/bash
 
-if [ -z "$1" ] || [ -z "$2" ]; then
+if [ "$#" -ne 2 ]; then
   echo "Usage: $0 <organization> <workspace_name>"
+  exit 1
+fi
+
+source "$(dirname "$0")/helpers/tf-api.sh"
+
+organization_name="$1"
+workspace_name="$2"
+
+workspace_id="$(get_workspace_by_name "$organization_name" "$workspace_name" | jq -r '.data.id')"
+
+if [ "$workspace_id" != null ]; then
+  echo "$workspace_id"
   exit 0
 fi
 
-ORGANIZATION_NAME="$1"
-WORKSPACE_NAME="$2"
+# jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
+# shellcheck disable=SC2016
+data="$(jq -n --arg workspace_name "$workspace_name" '{"data":{"attributes":{"name":$workspace_name,"auto-apply":true},"type":"workspaces"}}')"
 
-WORKSPACE_ID=($(curl \
-  --header "Authorization: Bearer $TFC_TOKEN" \
-  --header "Content-Type: application/vnd.api+json" \
-  https://app.terraform.io/api/v2/organizations/$ORGANIZATION_NAME/workspaces/$WORKSPACE_NAME |
-  jq -r '.data.id'))
+workspace_id="$(create_workspace "$organization_name" "$data" | jq -r '.data.id')"
 
-if [ "$WORKSPACE_ID" != null ]; then
-  echo $WORKSPACE_ID
-  exit 0
-fi
-
-echo "{\"data\":{\"attributes\":{\"name\":\"$WORKSPACE_NAME\",\"auto-apply\":true},\"type\":\"workspaces\"}}" >./create_workspace.json
-
-WORKSPACE_ID=($(curl \
-  --header "Authorization: Bearer $TFC_TOKEN" \
-  --header "Content-Type: application/vnd.api+json" \
-  --request POST \
-  --data @create_workspace.json \
-  https://app.terraform.io/api/v2/organizations/$ORGANIZATION_NAME/workspaces |
-  jq -r '.data.id'))
-
-echo $WORKSPACE_ID
-
-rm ./create_workspace.json
+echo "$workspace_id"

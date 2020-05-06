@@ -18,7 +18,7 @@ spec:
             requests:
               cpu: 500m
               memory: 512Mi
-          image: docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:0.1.0
+          image: docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:0.1
           env:
             - name: TFC_TOKEN
               valueFrom:
@@ -30,5 +30,5 @@ spec:
                 secretKeyRef:
                   key: workspace_id
                   name: terraform-cloud-workspace
-          command: ["bash",  "/script.sh", "namespace,app"]
+          command: ["bash",  "/script.sh", "namespace", "app"]
       restartPolicy: Never
