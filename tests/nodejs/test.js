@@ -59,7 +59,7 @@ describe('GCS Create Bucket', function() {
     const result = await ctx.createBucket({ bucketName });
     assert.strictEqual(result.success, false);
     console.log(result.message);
-    assert.strictEqual(result.message.indexOf('does not have storage.buckets.create access to project') > -1, true);
+    assert.strictEqual(result.message.indexOf('does not have storage.buckets.create access') > -1, true);
   });
 });
 
