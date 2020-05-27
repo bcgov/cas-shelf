@@ -30,7 +30,7 @@ spec:
                 secretKeyRef:
                   key: workspace_id
                   name: terraform-cloud-workspace
-          command: ["bash",  "/script.sh", "namespace", "app"]
+          command: ["bash",  "/script.sh", "wksv3k-test", "app"]
       restartPolicy: Never
 
 # Usage
