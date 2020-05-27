@@ -51,5 +51,11 @@ kubernetes_host_value="$(echo "$kubernetes_host_data" | jq -r ".attributes.value
 namespace_apps_data="$(echo "$list_result" | jq -r ".data[] | select(.attributes.key == \"namespace_apps\") | .")"
 namespace_apps_value="$(echo "$namespace_apps_data" | jq -rc '.attributes.value | sub("[\\n\\s]";"";"g")')"
 
-echo "kubernetes_host=${kubernetes_host_value}" >> "$variable_file"
-echo "namespace_apps=${namespace_apps_value}" >> "$variable_file"
+kubernetes_namespaces_data="$(echo "$list_result" | jq -r ".data[] | select(.attributes.key == \"kubernetes_namespaces\") | .")"
+kubernetes_namespaces_value="$(echo "$kubernetes_namespaces_data" | jq -rc '.attributes.value | sub("[\\n\\s]";"";"g")')"
+
+{
+  echo "kubernetes_host=${kubernetes_host_value}"
+  echo "namespace_apps=${namespace_apps_value}"
+  echo "kubernetes_namespaces=${kubernetes_namespaces_value}"
+} >> "$variable_file"

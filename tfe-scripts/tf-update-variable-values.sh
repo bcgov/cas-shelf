@@ -30,9 +30,10 @@ while IFS= read -r line; do
   if [ ! -z "$var_key" ] && [ ! -z "$var_val" ]; then
     if [ "$var_key" == "namespace_apps" ]; then
       namespace_apps="$(echo "$var_val" | jq ". | unique")"
-      kubernetes_namespaces="$(echo "$namespace_apps" | jq 'map(. | split(",")[0]) | unique')"
-
       update_value "namespace_apps" "$namespace_apps"
+
+    elif [ "$var_key" == "kubernetes_namespaces" ]; then
+      kubernetes_namespaces="$(echo "$var_val" | jq ". | unique")"
       update_value "kubernetes_namespaces" "$kubernetes_namespaces"
 
     elif [ "$var_key" == "credentials_file" ]; then
