@@ -148,6 +148,9 @@ workflows:
       - shellcheck/check:
           pattern: '*.bats'
           executor: 'shellcheck'
+          filters:
+            tags:
+              only: /.*/
       - tools:
           requires:
             - shellcheck/check
