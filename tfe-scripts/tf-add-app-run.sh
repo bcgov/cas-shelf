@@ -47,6 +47,13 @@ run_payload="$(jq -n --arg workspace_id "$TFC_WORKSPACE_ID" '{"data":{"type":"ru
 
 run_id="$(create_run "$run_payload" | jq -r '.data.id')"
 
+if [ "$run_id" == null ]; then
+  echo "failed to create a run"
+  exit 1
+fi
+
+echo "run $run_id created"
+
 # see https://github.com/hashicorp/go-tfe/blob/master/run.go#L49 for all available run statuses.
 completed_statuses=(null "applied" "canceled" "discarded" "errored" "planned_and_finished" "policy_soft_failed")
 

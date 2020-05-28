@@ -3,6 +3,8 @@ kind: Job
 metadata:
   name: cas-shelf-tfe-add-app
 spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 7200
   parallelism: 1
   completions: 1
   template:
@@ -19,6 +21,7 @@ spec:
               cpu: 500m
               memory: 512Mi
           image: docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:0.1
+          imagePullPolicy: Always
           env:
             - name: TFC_TOKEN
               valueFrom:
