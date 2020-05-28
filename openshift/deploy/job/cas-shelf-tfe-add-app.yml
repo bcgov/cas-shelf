@@ -4,7 +4,7 @@ metadata:
   name: cas-shelf-tfe-add-app
 spec:
   backoffLimit: 0
-  activeDeadlineSeconds: 7200
+  activeDeadlineSeconds: 900
   parallelism: 1
   completions: 1
   template:
@@ -15,11 +15,11 @@ spec:
         - name: cas-shelf-tfe-add-app
           resources:
             limits:
-              cpu: '1'
-              memory: 1Gi
+              cpu: 1000m
+              memory: 128Mi
             requests:
-              cpu: 500m
-              memory: 512Mi
+              cpu: 100m
+              memory: 64Mi
           image: docker.pkg.github.com/bcgov/cas-shelf/cas-shelf-tfe-add-app:0.1
           imagePullPolicy: Always
           env:
