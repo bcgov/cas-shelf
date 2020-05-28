@@ -20,7 +20,7 @@ fi
 var_id="$(create_var "$workspace_id" "$payload_file" | jq -r '.data.id')"
 
 if [ "$var_id" != null ]; then
-  echo "$var_id"
+  echo "variable $var_id created"
   exit 0
 fi
 
@@ -31,4 +31,4 @@ var_id="$(echo "$var_data" | jq -r ".id")"
 
 var_id="$(update_var "$workspace_id" "$var_id" "@${payload_file}" | jq -r '.data.id')"
 
-echo "$var_id"
+echo "variable $var_id updated"

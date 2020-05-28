@@ -22,4 +22,4 @@ data="$(jq -n --arg var_value "$var_value" '{"data":{"attributes":{"value":$var_
 
 var_id="$(update_var "$workspace_id" "$var_id" "$data" | jq -r '.data.id')"
 
-echo "$var_id"
+echo "variable $var_id updated"
