@@ -45,13 +45,17 @@ run_payload="$(jq -n --arg workspace_id "$TFC_WORKSPACE_ID" '{"data":{"type":"ru
 
 run_id="$(create_run "$run_payload" | jq -r '.data.id')"
 
+# see https://github.com/hashicorp/go-tfe/blob/master/run.go#L49 for all available run statuses.
 get_status() {
   status="$(get_run "$run_id" | jq -r '.data.attributes.status')"
+  echo "$status"
 
-  if [ "$status" == "errored" ]; then return 1; fi
-  if [ "$status" == "discarded" ]; then return 1; fi
   if [ "$status" == "applied" ]; then return 1; fi
+  if [ "$status" == "canceled" ]; then return 1; fi
+  if [ "$status" == "discarded" ]; then return 1; fi
+  if [ "$status" == "errored" ]; then return 1; fi
   if [ "$status" == "planned_and_finished" ]; then return 1; fi
+  if [ "$status" == "policy_soft_failed" ]; then return 1; fi
 }
 
 while get_status; do sleep 5; done
