@@ -16,4 +16,6 @@ if [ -f "$credentials_file" ]; then
     echo "TF_VAR_credentials=${credentials}"
     echo "TF_VAR_project_id=${project_id}"
   } >> "$env_file"
+else
+  touch "$env_file"
 fi
