@@ -56,7 +56,7 @@ jobs:
             make setup
             make dep
             make terratest
-            make test_node
+            make nodejs_test
             make destroy
           working_directory: ~/cas-shelf/tests
       - orb-tools/install-bats

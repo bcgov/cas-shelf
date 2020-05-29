@@ -7,7 +7,7 @@ const statAsync = util.promisify(fs.stat);
 const readdirAsync = util.promisify(fs.readdir);
 const readfileAsync = util.promisify(fs.readFile);
 
-const projectId = process.env.TF_VAR_project_name;
+const projectId = process.env.TF_VAR_project_id;;
 
 const KEY_DIRECTORY = '../keys';
 const BUCKET_PREFIX_FILE = '../test-bucket-prefix';
