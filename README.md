@@ -50,7 +50,7 @@ make create_workspace org=<my-team> workspace=<my-workspace>
    - `credentials_file`: the credentials file path of Google Cloud service account
    - `kubernetes_host`: the hostname of Openshift cluster
    - `kubernetes_token`: the authentication token of Openshift cluster
-     - Use [`Service Account Tokens`](https://docs.openshift.com/container-platform/3.5/rest_api/index.html#rest-api-serviceaccount-tokens) instead of `Session Tokens`, which is expiring within 24 hours by default.
+     - Use [`Service Account Tokens`](https://docs.openshift.com/container-platform/3.11/rest_api/index.html#rest-api-serviceaccount-tokens) instead of `Session Tokens`, which is expiring within 24 hours by default.
    - `kubernetes_namespaces`: the list of Openshift namespaces to run jobs
    - `namespace_apps`: the list of namespace and app name pairs of Openshift cluster
 
@@ -76,7 +76,7 @@ make destroy org=<my-team> workspace=<my-workspace> # it destroys all resources 
 make delete_workspace org=<my-team> workspace=<my-workspace> # it deletes the workspace
 ```
 
-- `sync` command is useful to sync variable `namespace_apps` value because it gets updated during deployment process.
+- `sync_values` command is useful to sync variable `namespace_apps` value because it gets updated during deployment process.
 - It is highly recommended to run `destroy` command to remove resources before deleting a workspace.
 
 ### How to provision a new bucket for a new app during deployment process

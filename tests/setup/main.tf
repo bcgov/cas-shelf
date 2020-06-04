@@ -4,7 +4,7 @@ terraform {
 
 provider "google" {
   credentials = var.credentials
-  project     = var.project_name
+  project     = var.project_id
   region      = local.region
 }
 

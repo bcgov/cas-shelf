@@ -1,10 +1,10 @@
-variable "project_name" {}
+variable "project_id" {}
+
+variable "credentials" {} # JSON string of the GCP service account credentials file
 
 variable "my_bucket_name" {}
 
 variable "other_bucket_name" {}
-
-variable "credentials" {} # JSON string of the GCP service account credentials file
 
 locals {
   region  = "northamerica-northeast1" # Montreal

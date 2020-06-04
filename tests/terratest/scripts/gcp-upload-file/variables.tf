@@ -3,7 +3,7 @@ locals {
   bucket_prefix = file("../../../test-bucket-prefix")
 }
 
-variable "project_name" {}
+variable "project_id" {}
 
 variable "bucket_name" {}
 
