@@ -55,7 +55,8 @@ fi
 echo "run $run_id created"
 
 # see https://github.com/hashicorp/go-tfe/blob/master/run.go#L49 for all available run statuses.
-completed_statuses=(null "applied" "canceled" "discarded" "errored" "planned_and_finished" "policy_soft_failed")
+completed_statuses=(null "applied" "canceled" "discarded" "planned_and_finished")
+errored_statuses=("errored" "policy_soft_failed")
 
 count=0
 get_status() {
@@ -68,9 +69,15 @@ get_status() {
     return 1
   fi
 
+  # disable shellcheck to match literally
+  # shellcheck disable=SC2076
+  if [[ "${errored_statuses[@]}" =~ "$status" ]]; then
+    exit 1
+  fi
+
   if [[ "$count" -gt 50 ]]; then
     echo "timed out"
-    return 1
+    exit 1
   fi
 
   count=$((count + 1))
