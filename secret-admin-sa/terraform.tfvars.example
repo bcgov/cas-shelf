@@ -1,0 +1,4 @@
+kubernetes_token = ""
+kubernetes_host = ""
+kubernetes_role_namespaces = []
+kubernetes_service_account_namespace = ""
