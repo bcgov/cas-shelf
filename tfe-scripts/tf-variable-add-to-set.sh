@@ -5,14 +5,18 @@ if [ "$#" -ne 3 ]; then
   exit 1
 fi
 
-source "$(dirname "$0")/helpers/tf-api.sh"
+pwd="$(dirname "$0")"
+source "$pwd/helpers/tf-api.sh"
+source "$pwd/helpers/tf-common.sh"
 
 workspace_id="$1"
 variable_name="$2"
 item="$3"
 
-list_result="$(list_vars "$workspace_id")"
-var_data="$(echo "$list_result" | jq -r ".data[] | select(.attributes.key == \"$variable_name\") | .")"
+list_vars_response="$(list_vars "$workspace_id")"
+if is_error_response "$list_vars_response"; then exit 1; fi
+
+var_data="$(echo "$list_vars_response" | jq -r ".data[] | select(.attributes.key == \"$variable_name\") | .")"
 var_id="$(echo "$var_data" | jq -r ".id")"
 value="$(echo "$var_data" | jq -r ".attributes.value")"
 new_value="$(echo "$value" | jq ". + [\"$item\"] | unique")"

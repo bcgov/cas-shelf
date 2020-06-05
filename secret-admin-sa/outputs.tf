@@ -3,5 +3,5 @@ output "service_account_name" {
 }
 
 output "service_account_token" {
-  value = "${data.kubernetes_secret.example.data.token}"
+  value = "${data.kubernetes_secret.secret.data.token}"
 }
