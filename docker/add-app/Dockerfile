@@ -8,5 +8,5 @@ RUN apt-get update --fix-missing -q  \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY ./tfe-scripts/helpers/tf-api.sh /helpers/tf-api.sh
+COPY ./tfe-scripts/helpers /helpers
 COPY ./tfe-scripts/tf-add-app-run.sh /script.sh

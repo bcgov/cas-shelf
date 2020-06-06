@@ -8,6 +8,7 @@ fi
 
 pwd="$(dirname "$0")"
 source "$pwd/helpers/tf-api.sh"
+source "$pwd/helpers/tf-common.sh"
 
 variable_file="$1"
 
@@ -16,7 +17,10 @@ if [ -z "$3" ]; then
 else
   organization_name="$2"
   workspace_name="$3"
-  workspace_id="$(get_workspace_by_name "$organization_name" "$workspace_name" | jq -r '.data.id')"
+  workspace_response="$(get_workspace_by_name "$organization_name" "$workspace_name")"
+
+  if is_error_response "$workspace_response"; then exit 1; fi
+  workspace_id="$(echo "$workspace_response" | jq -r '.data.id')"
 fi
 
 update_value() {
@@ -37,12 +41,12 @@ while IFS= read -r line; do
       update_value "kubernetes_namespaces" "$kubernetes_namespaces"
 
     elif [ "$var_key" == "credentials_file" ]; then
-      project_id="$(jq -r '.project_id' < "$var_val")"
-      client_email="$(jq -r '.client_email' < "$var_val")"
+      project_id="$(jq -r '.project_id' <"$var_val")"
+      client_email="$(jq -r '.client_email' <"$var_val")"
 
       # read value as json string to have new line characters as it is
       # and strip first and last characters which are double quotes
-      private_key="$(jq '.private_key' < "$var_val")"
+      private_key="$(jq '.private_key' <"$var_val")"
       length=${#private_key}-2
       private_key=${private_key:1:$length}
 

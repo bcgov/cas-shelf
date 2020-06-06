@@ -5,9 +5,14 @@ if [ "$#" -ne 2 ]; then
   exit 1
 fi
 
-source "$(dirname "$0")/helpers/tf-api.sh"
+pwd="$(dirname "$0")"
+source "$pwd/helpers/tf-api.sh"
+source "$pwd/helpers/tf-common.sh"
 
 organization_name="$1"
 workspace_name="$2"
 
-delete_workspace_by_name "$organization_name" "$workspace_name"
+workspace_response="$(delete_workspace_by_name "$organization_name" "$workspace_name")"
+
+if is_error_response "$workspace_response"; then exit 1; fi
+echo "workspace $organization_name/$workspace_name deleted successfully"

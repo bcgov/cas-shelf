@@ -5,25 +5,19 @@ if [ "$#" -ne 2 ]; then
   exit 1
 fi
 
-source "$(dirname "$0")/helpers/tf-api.sh"
+pwd="$(dirname "$0")"
+source "$pwd/helpers/tf-api.sh"
+source "$pwd/helpers/tf-common.sh"
 
 namespace="$1"
 app="$2"
 namespace_app="${namespace},${app}"
 namespace_apps_key="namespace_apps"
 
-list_result="$(list_vars "$TFC_WORKSPACE_ID")"
+list_vars_response="$(list_vars "$TFC_WORKSPACE_ID")"
+if is_error_response "$list_vars_response"; then exit 1; fi
 
-errors="$(echo "$list_result" | jq -r ".errors")"
-
-if [ "$errors" != null ]; then
-  error_status="$(echo "$errors" | jq -r ".[] .status")"
-  error_msg="$(echo "$errors" | jq -r ".[] .title")"
-  echo "$error_msg ($error_status)"
-  exit 1
-fi
-
-napespace_apps_data="$(echo "$list_result" | jq -r ".data[] | select(.attributes.key == \"$namespace_apps_key\") | .")"
+napespace_apps_data="$(echo "$list_vars_response" | jq -r ".data[] | select(.attributes.key == \"$namespace_apps_key\") | .")"
 namespace_apps_id="$(echo "$napespace_apps_data" | jq -r ".id")"
 
 if [ -z "$namespace_apps_id" ] || [ "$namespace_apps_id" == null ]; then

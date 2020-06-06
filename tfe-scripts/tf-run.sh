@@ -6,7 +6,9 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-source "$(dirname "$0")/helpers/tf-api.sh"
+pwd="$(dirname "$0")"
+source "$pwd/helpers/tf-api.sh"
+source "$pwd/helpers/tf-common.sh"
 
 is_destroy="false"
 
@@ -16,7 +18,10 @@ if [ -z "$2" ]; then
 else
   organization_name="$1"
   workspace_name="$2"
-  workspace_id="$(get_workspace_by_name "$organization_name" "$workspace_name" | jq -r '.data.id')"
+  workspace_response="$(get_workspace_by_name "$organization_name" "$workspace_name")"
+
+  if is_error_response "$workspace_response"; then exit 1; fi
+  workspace_id="$(echo "$workspace_response" | jq -r '.data.id')"
   if [ "$3" == "--delete" ]; then is_destroy="true"; fi
 fi
 

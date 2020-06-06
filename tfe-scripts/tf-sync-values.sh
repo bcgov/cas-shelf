@@ -8,6 +8,7 @@ fi
 
 pwd="$(dirname "$0")"
 source "$pwd/helpers/tf-api.sh"
+source "$pwd/helpers/tf-common.sh"
 
 variable_file="$1"
 
@@ -16,7 +17,10 @@ if [ -z "$3" ]; then
 else
   organization_name="$2"
   workspace_name="$3"
-  workspace_id="$(get_workspace_by_name "$organization_name" "$workspace_name" | jq -r '.data.id')"
+  workspace_response="$(get_workspace_by_name "$organization_name" "$workspace_name")"
+
+  if is_error_response "$workspace_response"; then exit 1; fi
+  workspace_id="$(echo "$workspace_response" | jq -r '.data.id')"
 fi
 
 list_result="$(list_vars "$workspace_id")"
@@ -38,11 +42,11 @@ rm "$variable_file"
 touch "$variable_file"
 
 if [ "$credentials_file" ]; then
-  echo "credentials_file=${credentials_file}" >> "$variable_file"
+  echo "credentials_file=${credentials_file}" >>"$variable_file"
 fi
 
 if [ "$kubernetes_token" ]; then
-  echo "kubernetes_token=${kubernetes_token}" >> "$variable_file"
+  echo "kubernetes_token=${kubernetes_token}" >>"$variable_file"
 fi
 
 kubernetes_host_data="$(echo "$list_result" | jq -r ".data[] | select(.attributes.key == \"kubernetes_host\") | .")"
@@ -58,4 +62,4 @@ kubernetes_namespaces_value="$(echo "$kubernetes_namespaces_data" | jq -rc '.att
   echo "kubernetes_host=${kubernetes_host_value}"
   echo "namespace_apps=${namespace_apps_value}"
   echo "kubernetes_namespaces=${kubernetes_namespaces_value}"
-} >> "$variable_file"
+} >>"$variable_file"

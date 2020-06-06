@@ -56,7 +56,7 @@ resource "kubernetes_role_binding" "binder" {
   }
 }
 
-data "kubernetes_secret" "example" {
+data "kubernetes_secret" "secret" {
   metadata {
     name      = kubernetes_service_account.sa.default_secret_name
     namespace = var.kubernetes_service_account_namespace

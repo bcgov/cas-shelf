@@ -25,53 +25,58 @@ provider "google" {
 
 # Create GCS buckets
 resource "google_storage_bucket" "bucket" {
-  count    = length(var.namespace_apps)
-  name     = "${split(",", element(var.namespace_apps, count.index))[0]}-${split(",", element(var.namespace_apps, count.index))[1]}"
+  for_each = { for v in var.namespace_apps : v => "${split(",", v)[0]}-${split(",", v)[1]}" }
+  name     = each.value
   location = local.region
 }
 
 # Create GCP service accounts for each GCS bucket
 resource "google_service_account" "account" {
-  count        = length(google_storage_bucket.bucket)
-  account_id   = "${google_storage_bucket.bucket[count.index].name}-sa"
-  display_name = "${google_storage_bucket.bucket[count.index].name} Service Account"
+  for_each     = { for v in var.namespace_apps : v => "${split(",", v)[0]}-${split(",", v)[1]}" }
+  account_id   = "${each.value}-sa"
+  display_name = "${each.value} Service Account"
   depends_on   = [google_storage_bucket.bucket]
 }
 
-# Assign Storage Admin role for the corresponding service accounts
-resource "google_storage_bucket_iam_member" "editor" {
-  count      = length(google_storage_bucket.bucket)
-  bucket     = google_storage_bucket.bucket[count.index].name
+# # Assign Storage Admin role for the corresponding service accounts
+resource "google_storage_bucket_iam_member" "admin" {
+  for_each   = { for v in var.namespace_apps : v => "${split(",", v)[0]}-${split(",", v)[1]}" }
+  bucket     = each.value
   role       = "roles/storage.admin"
-  member     = "serviceAccount:${google_service_account.account[count.index].email}"
+  member     = "serviceAccount:${google_service_account.account[each.key].email}"
   depends_on = [google_service_account.account]
 }
 
 # Create keys for the service accounts
 resource "google_service_account_key" "key" {
-  count              = length(google_storage_bucket.bucket)
-  service_account_id = google_service_account.account[count.index].name
+  for_each           = { for v in var.namespace_apps : v => "${split(",", v)[0]}-${split(",", v)[1]}" }
+  service_account_id = google_service_account.account[each.key].name
 }
 
-# https://docs.openshift.com/container-platform/3.7/dev_guide/secrets.html#types-of-secrets
 resource "kubernetes_secret" "secret_sa" {
-  count = length(google_storage_bucket.bucket)
+  for_each = { for v in var.namespace_apps : v => "${split(",", v)[0]}-${split(",", v)[1]}" }
   metadata {
-    name      = "gcp-${google_storage_bucket.bucket[count.index].name}-service-account-key"
-    namespace = split(",", element(var.namespace_apps, count.index))[0]
+    name      = "gcp-${each.value}-service-account-key"
+    namespace = split(",", each.key)[0]
+    labels = {
+      created-by = "Terraform"
+    }
   }
 
   data = {
-    "bucket_name"      = google_storage_bucket.bucket[count.index].name
-    "credentials.json" = base64decode(google_service_account_key.key[count.index].private_key)
+    "bucket_name"      = each.value
+    "credentials.json" = base64decode(google_service_account_key.key[each.key].private_key)
   }
 }
 
 resource "kubernetes_secret" "secret_tfc" {
-  count = length(var.kubernetes_namespaces)
+  for_each = { for v in var.kubernetes_namespaces : v => v }
   metadata {
     name      = "terraform-cloud-workspace"
-    namespace = element(var.kubernetes_namespaces, count.index)
+    namespace = each.key
+    labels = {
+      created-by = "Terraform"
+    }
   }
 
   data = {

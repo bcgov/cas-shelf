@@ -121,6 +121,7 @@ service_account_name = <namespace>/<service_account_name>
 service_account_token = <service_account_token>
 ```
 
+- The service account will have minimum privileges to support the main Terraform script.
 - Note that it will create Terraform state data in your local machine.
 
 ### How to provision a new bucket for a new app during deployment process
