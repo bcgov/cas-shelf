@@ -141,11 +141,19 @@ workflows:
             tags:
               only: /.*/
       - build_and_push:
+          name: build_and_push_sha1
+          image_tag: ${CIRCLE_SHA1}
+          context: cas-pipeline
+          requires:
+            - unit
+      - build_and_push:
+          name: build_and_push_tag
+          image_tag: ${CIRCLE_TAG/v/}
           context: cas-pipeline
           requires:
             - unit
           filters:
+            tags:
+              only: /^v.*/
             branches:
               ignore: /.*/
-            tags:
-              only: /.*/
