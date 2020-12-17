@@ -76,48 +76,66 @@ jobs:
 
   build_and_push:
     executor: gcp-gcr/default
-    parameters:
-      image_tag:
-        type: string
-      cache_version:
-        type: integer
-        default: 2
     working_directory: ~/cas-shelf
     steps:
       - checkout
       - gcp-gcr/gcr-auth
+      - run:
+          name: Install semver for versioning
+          command: |
+            git clone git@github.com:fsaintjacques/semver-tool.git
       - restore_cache:
           keys:
-            - v<< parameters.cache_version>>-cas-shelf-{{ .Branch }}
+            - v1-{{ .Branch }}
           paths:
-            - /tmp/cas-shelf.tar
+            - /tmp/cas-shelf-tfe-add-app.tar
       - run:
-          name: Load cache
+          name: Load Docker image layer cache
           command: |
             set +o pipefail
-            docker load -i /tmp/cas-shelf.tar | true
+            docker load -i /tmp/cas-shelf-tfe-add-app.tar | true
       - run:
           name: Log in to DockerHub
           command: echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USER --password-stdin registry.hub.docker.com
       - run:
           name: Build application Docker image
           command: |
-            docker build --cache-from=cas-shelf -t cas-shelf:latest -t gcr.io/${GOOGLE_PROJECT_ID}/cas-shelf:<< parameters.image_tag >> -f ./docker/add-app/Dockerfile .
+            docker build --cache-from=cas-shelf-tfe-add-app -t cas-shelf-tfe-add-app -f ./docker/add-app/Dockerfile .
       - run:
           name: Save Docker image layer cache
           command: |
-            docker save -o /tmp/cas-shelf.tar cas-shelf:latest
+            mkdir -p /tmp
+            docker save -o /tmp/cas-shelf-tfe-add-app.tar cas-shelf-tfe-add-app
       - save_cache:
-          key: v<< parameters.cache_version>>-cas-shelf-{{ .Branch }}-{{ epoch }}
+          key: v1-{{ .Branch }}-{{ epoch }}
           paths:
-            - /tmp/cas-shelf.tar
-      - gcp-gcr/push-image:
-          image: cas-shelf
-          tag: << parameters.image_tag >>
-          digest-path: /tmp/digest.txt
-      - run:
+            - /tmp/cas-shelf-tfe-add-app.tar
+      - deploy:
+          name: Push application Docker image
           command: |
-            echo "Digest is: $(</tmp/digest.txt)"
+            SEMVER_GET="./semver-tool/src/semver get"
+            MAJOR=$($SEMVER_GET major $CIRCLE_TAG)
+            MINOR=$($SEMVER_GET minor $CIRCLE_TAG)
+            PATCH=$($SEMVER_GET patch $CIRCLE_TAG)
+            PRE=$($SEMVER_GET prerel $CIRCLE_TAG)
+            TAG1=${MAJOR}
+            TAG2=${MAJOR}.${MINOR}
+            TAG3=${MAJOR}.${MINOR}.${PATCH}
+            TAG4=${MAJOR}.${MINOR}.${PATCH}-${PRE}
+            ALL_TAGS=""
+            ALL_TAGS="${ALL_TAGS} ${TAG1}"
+            ALL_TAGS="${ALL_TAGS} ${TAG2}"
+            ALL_TAGS="${ALL_TAGS} ${TAG3}"
+            ALL_TAGS="${ALL_TAGS} ${TAG4}"
+            if [ $CIRCLE_TAG != $TAG4 ]; then
+              ALL_TAGS="${ALL_TAGS} ${CIRCLE_TAG}"
+            fi
+
+            for TAG in ${ALL_TAGS}; do
+              TARGET="gcr.io/${GOOGLE_PROJECT_ID}/cas-shelf-tfe-add-app:${TAG}"
+              docker tag cas-shelf-tfe-add-app ${TARGET}
+              docker push ${TARGET}
+            done
 
 workflows:
   version: 2
@@ -143,18 +161,19 @@ workflows:
               only: /.*/
       - build_and_push:
           name: build_and_push_sha1
-          image_tag: ${CIRCLE_SHA1}
-          context: cas-pipeline
-          requires:
-            - unit
-      - build_and_push:
-          name: build_and_push_tag
-          image_tag: ${CIRCLE_TAG/v/}
           context: cas-pipeline
           requires:
             - unit
           filters:
             tags:
-              only: /^v.*/
+              only: /.*/
+      - build_and_push:
+          name: build_and_push_tag
+          context: cas-pipeline
+          requires:
+            - unit
+          filters:
+            tags:
+              only: /.*/
             branches:
               ignore: /.*/
