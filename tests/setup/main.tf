@@ -24,7 +24,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_service_account" "account" {
   count        = length(local.buckets)
-  account_id   = "${google_storage_bucket.bucket[count.index].name}-sa"
+  account_id   = "sa-${google_storage_bucket.bucket[count.index].name}"
   display_name = "${google_storage_bucket.bucket[count.index].name} Service Account"
   depends_on   = [google_storage_bucket.bucket]
 }
