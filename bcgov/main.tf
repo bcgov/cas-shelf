@@ -33,7 +33,7 @@ resource "google_storage_bucket" "bucket" {
 # Create GCP service accounts for each GCS bucket
 resource "google_service_account" "account" {
   for_each     = { for v in var.namespace_apps : v => "${split(",", v)[0]}-${split(",", v)[1]}" }
-  account_id   = "${each.value}-sa"
+  account_id   = "sa-${each.value}"
   display_name = "${each.value} Service Account"
   depends_on   = [google_storage_bucket.bucket]
 }
