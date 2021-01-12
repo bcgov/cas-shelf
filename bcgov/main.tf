@@ -1,3 +1,5 @@
+# Terraform workspace configuration. To apply changes to this file, use `make create_workspace`
+
 # Configure OCP infrastructure to setup the host and authentication token
 provider "kubernetes" {
   load_config_file = "false"
@@ -47,10 +49,33 @@ resource "google_storage_bucket_iam_member" "admin" {
   depends_on = [google_service_account.account]
 }
 
+# Create viewer GCP service accounts for each GCS bucket
+resource "google_service_account" "viewer_account" {
+  for_each     = { for v in var.namespace_apps : v => "${split(",", v)[0]}-${split(",", v)[1]}" }
+  account_id   = "ro-${each.value}"
+  display_name = "${each.value} Viewer Service Account"
+  depends_on   = [google_storage_bucket.bucket]
+}
+
+# # Assign Storage Viewer role for the corresponding service accounts
+resource "google_storage_bucket_iam_member" "viewer" {
+  for_each   = { for v in var.namespace_apps : v => "${split(",", v)[0]}-${split(",", v)[1]}" }
+  bucket     = each.value
+  role       = "roles/storage.objectViewer"
+  member     = "serviceAccount:${google_service_account.viewer_account[each.key].email}"
+  depends_on = [google_service_account.viewer_account]
+}
+
 # Create keys for the service accounts
 resource "google_service_account_key" "key" {
   for_each           = { for v in var.namespace_apps : v => "${split(",", v)[0]}-${split(",", v)[1]}" }
   service_account_id = google_service_account.account[each.key].name
+}
+
+# Create keys for the viewer service accounts
+resource "google_service_account_key" "viewer_key" {
+  for_each           = { for v in var.namespace_apps : v => "${split(",", v)[0]}-${split(",", v)[1]}" }
+  service_account_id = google_service_account.viewer_account[each.key].name
 }
 
 resource "kubernetes_secret" "secret_sa" {
@@ -66,6 +91,7 @@ resource "kubernetes_secret" "secret_sa" {
   data = {
     "bucket_name"      = each.value
     "credentials.json" = base64decode(google_service_account_key.key[each.key].private_key)
+    "viewer_credentials.json" = base64decode(google_service_account_key.viewer_key[each.key].private_key)
   }
 }
 
