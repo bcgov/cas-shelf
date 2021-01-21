@@ -1,5 +1,14 @@
 # Terraform workspace configuration. To apply changes to this file, use `make create_workspace`
 
+terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "1.13"
+    }
+  }
+}
+
 # Configure OCP infrastructure to setup the host and authentication token
 provider "kubernetes" {
   load_config_file = "false"
