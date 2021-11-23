@@ -1,4 +1,4 @@
-terraform 0.12.23
+terraform 0.12.31
 golang 1.14
 nodejs 12.16.1
 yarn 1.22.17

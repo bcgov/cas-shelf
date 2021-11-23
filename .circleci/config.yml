@@ -25,7 +25,7 @@ jobs:
       - restore_cache:
           name: Restore asdf Tools Cache
           keys:
-            - tool-versions-{{ checksum ".tool-versions" }}-v2
+            - tool-versions-{{ checksum ".tool-versions" }}-v3
       - run:
           name: Install tools via asdf
           command: |
@@ -37,7 +37,7 @@ jobs:
             make install_asdf_tools
       - save_cache:
           name: Save asdf Tools Cache
-          key: tool-versions-{{ checksum ".tool-versions" }}-v2
+          key: tool-versions-{{ checksum ".tool-versions" }}-v3
           paths:
             - ~/.asdf
       - persist_to_workspace:
