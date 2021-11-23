@@ -28,7 +28,6 @@ destroy:
 
 .PHONY: dep
 dep:
-	go mod init cas_shelf_test_module
 	go get github.com/gruntwork-io/terratest/modules/terraform
 	go get github.com/stretchr/testify/assert
 
