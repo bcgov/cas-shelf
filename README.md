@@ -3,6 +3,10 @@
 Terraform Enterprise API scripts located in folder `tfe-scripts` helps create a new workspace with the initial configuration, folder `bcgov`
 and user-defined configure variables, folder `variables`.
 
+## Status
+
+![Lifecycle:Stable](https://img.shields.io/badge/Lifecycle-Stable-97ca00)
+
 ## Steps
 
 ### Install Tools
