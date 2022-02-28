@@ -52,7 +52,6 @@ echo "run $run_id created"
 completed_statuses=(null "applied" "canceled" "discarded" "planned_and_finished")
 errored_statuses=("errored" "policy_soft_failed")
 
-count=0
 get_status() {
   status="$(get_run "$run_id" | jq -r '.data.attributes.status')"
   echo "run status - $status"
@@ -68,13 +67,6 @@ get_status() {
   if [[ "${errored_statuses[@]}" =~ "$status" ]]; then
     exit 1
   fi
-
-  if [[ "$count" -gt 50 ]]; then
-    echo "timed out"
-    exit 1
-  fi
-
-  count=$((count + 1))
 }
 
 while get_status; do sleep 5; done
