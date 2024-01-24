@@ -1,3 +1,9 @@
+# ⚠️ This repository is now deprecated ⚠️
+
+Please see [cas-pipeline](http://www.github.com/bcgov/cas-pipeline) for a comparable Terraform flow.
+
+> Due to changes to Terraform Cloud plans, we have moved away from using it as our runner and state store. Each repo will handle it's own state and runs. See more information in [cas-pipeline](http://www.github.com/bcgov/cas-pipeline) for our Terraform usage patterns.
+
 # Google Cloud Storage - Terraform API-driven workflow
 
 Terraform Enterprise API scripts located in folder `tfe-scripts` helps create a new workspace with the initial configuration, folder `bcgov`
@@ -5,7 +11,7 @@ and user-defined configure variables, folder `variables`.
 
 ## Status
 
-![Lifecycle:Stable](https://img.shields.io/badge/Lifecycle-Stable-97ca00)
+![Lifecycle:Deprecated](https://img.shields.io/badge/Lifecycle-Deprecated-red)
 
 ## Steps
 
